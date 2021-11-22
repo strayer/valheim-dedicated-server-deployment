@@ -1,0 +1,19 @@
+- hosts: valheim_server
+  remote_user: root
+  roles:
+    - harden_ssh
+    - zram
+    - steamcmd
+    - valheim_server
+    - telegraf
+    - bottom
+  tasks:
+    - name: Configure vm.swappiness
+      ansible.posix.sysctl:
+        name: vm.swappiness
+        value: "10"
+    - name: Install kitty-terminfo
+      apt:
+        name: kitty-terminfo
+        cache_valid_time: 3600
+        state: present

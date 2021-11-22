@@ -1,0 +1,41 @@
+---
+- name: create steam group
+  ansible.builtin.group:
+    name: steam
+    gid: 2500
+- name: create steam user
+  ansible.builtin.user:
+    name: steam
+    uid: 2500
+    group: steam
+    create_home: yes
+- name: install lib32gcc-s1
+  apt:
+    name: lib32gcc-s1
+    cache_valid_time: 3600
+    state: present
+- name: create /opt/steamcmd
+  file:
+    path: /opt/steamcmd
+    state: directory
+    owner: steam
+    group: steam
+- name: check if steamcmd file exists
+  stat:
+    path: /opt/steamcmd/linux32/steamcmd
+  register: stat_steamcmd
+- name: install SteamCMD
+  ansible.builtin.unarchive:
+    src: https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz
+    dest: /opt/steamcmd
+    remote_src: yes
+  when:
+    stat_steamcmd.stat.exists == False
+  become: yes
+  become_user: steam
+- name: set up Steam
+  command:
+    cmd: /opt/steamcmd/steamcmd.sh +login anonymous +quit
+    creates: /home/steam/Steam/userdata/anonymous/config/localconfig.vdf
+  become: yes
+  become_user: steam

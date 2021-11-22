@@ -1,0 +1,33 @@
+[global_tags]
+
+[agent]
+  interval = "10s"
+  flush_interval = "60s"
+  flush_jitter = "0s"
+  logtarget = "stderr"
+
+[[outputs.influxdb_v2]]
+  urls = ["{{ lookup('env', 'INFLUXDB_URL') }}"]
+  token = "{{ lookup('env', 'INFLUXDB_TOKEN') }}"
+  organization = "{{ lookup('env', 'INFLUXDB_ORGANIZATION') }}"
+  bucket = "{{ lookup('env', 'INFLUXDB_BUCKET') }}"
+
+[[inputs.cpu]]
+  percpu = true
+  totalcpu = true
+  collect_cpu_time = false
+  report_active = false
+
+[[inputs.disk]]
+  ignore_fs = ["tmpfs", "devtmpfs", "devfs", "iso9660", "overlay", "aufs", "squashfs"]
+
+[[inputs.diskio]]
+[[inputs.kernel]]
+[[inputs.mem]]
+[[inputs.processes]]
+[[inputs.swap]]
+[[inputs.system]]
+[[inputs.net]]
+[[inputs.temp]]
+
+# vim: ft=toml.jinja2
