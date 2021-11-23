@@ -37,8 +37,9 @@
     dest: /etc/systemd/system/valheim.service
     owner: root
     group: root
+    mode: 0644
   register: copy_valheim_systemd_unit
-- name: reload systemd daemon
+- name: reload systemd daemon # noqa no-handler
   ansible.builtin.systemd:
     daemon_reload: yes
   when: copy_valheim_systemd_unit.changed

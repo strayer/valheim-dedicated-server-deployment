@@ -20,7 +20,7 @@
     dest: /root/telegraf.deb
     checksum:  sha256:667bed3e97d2c914c34a14c544bd0c767353879c0427c65fa82d53da9420555d
   register: download_telegraf_deb
-- name: install telegraf
+- name: install telegraf # noqa no-handler
   apt:
     deb: /root/telegraf.deb
   when: download_telegraf_deb.changed

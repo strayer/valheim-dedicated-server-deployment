@@ -20,6 +20,7 @@
     state: directory
     owner: steam
     group: steam
+    mode: 0755
 - name: check if steamcmd file exists
   stat:
     path: /opt/steamcmd/linux32/steamcmd
@@ -29,8 +30,7 @@
     src: https://steamcdn-a.akamaihd.net/client/installer/steamcmd_linux.tar.gz
     dest: /opt/steamcmd
     remote_src: yes
-  when:
-    stat_steamcmd.stat.exists == False
+  when: not stat_steamcmd.stat.exists
   become: yes
   become_user: steam
 - name: set up Steam
