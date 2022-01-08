@@ -127,6 +127,12 @@ resource "hcloud_server" "valheim-server" {
   firewall_ids = [hcloud_firewall.valheim-firewall.id]
 }
 
+resource "hcloud_rdns" "valheim-server-ipv4" {
+  server_id  = hcloud_server.valheim-server.id
+  ip_address = hcloud_server.valheim-server.ipv4_address
+  dns_ptr    = cloudflare_record.valheim_server_ipv4.hostname
+}
+
 resource "hcloud_volume_attachment" "valheim-home-to-server" {
   volume_id = data.hcloud_volume.valheim-home.id
   server_id = hcloud_server.valheim-server.id

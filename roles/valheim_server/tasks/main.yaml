@@ -39,6 +39,27 @@
     group: root
     mode: 0644
   register: copy_valheim_systemd_unit
+- name: install jq and dig for discord webhooks
+  apt:
+    name:
+      - jq
+      - bind9-dnsutils
+    cache_valid_time: 3600
+    state: present
+- name: copy discord server starting script
+  template:
+    src: templates/notify-discord-server-starting.sh.j2
+    dest: /usr/local/bin/notify-discord-server-starting.sh
+    owner: root
+    group: root
+    mode: 0755
+- name: copy server run script
+  template:
+    src: templates/start-valheim-server.sh.j2
+    dest: /usr/local/bin/start-valheim-server.sh
+    owner: root
+    group: root
+    mode: 0755
 - name: reload systemd daemon # noqa no-handler
   ansible.builtin.systemd:
     daemon_reload: yes

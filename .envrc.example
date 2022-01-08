@@ -15,6 +15,8 @@ export VALHEIM_SERVER_NAME="foobar"
 export VALHEIM_SERVER_WORLD="foobar"
 export VALHEIM_SERVER_PASSWORD="foobar"
 
+export DISCORD_MAIN_CHANNEL_WEBHOOK="https://discord.com/api/webhooks/foo/bar"
+
 # terraform vars
 export TF_VAR_zone_name=$DOMAIN
 export TF_VAR_server_subdomain=$SERVER_SUBDOMAIN

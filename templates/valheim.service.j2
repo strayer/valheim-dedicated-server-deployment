@@ -4,16 +4,13 @@ Wants=network.target
 After=syslog.target network-online.target
 
 [Service]
-Environment=SteamAppId=892970
-Environment=LD_LIBRARY_PATH=/opt/valheim/linux64:$LD_LIBRARY_PATH
 Type=simple
 Restart=on-failure
 RestartSec=10
 KillSignal=SIGINT
 User=valheim
 Group=valheim
-WorkingDirectory=/opt/valheim
-ExecStart=/opt/valheim/valheim_server.x86_64 -nographics -batchmode -name "{{ lookup('env', 'VALHEIM_SERVER_NAME') }}" -port 2456 -world "{{ lookup('env', 'VALHEIM_SERVER_WORLD') }}" -password "{{ lookup('env', 'VALHEIM_SERVER_PASSWORD') }}" -public 0
+ExecStart=/usr/local/bin/start-valheim-server.sh
 
 [Install]
 WantedBy=multi-user.target
