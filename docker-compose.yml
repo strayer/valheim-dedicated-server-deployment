@@ -1,0 +1,52 @@
+version: "3.8"
+
+networks:
+  redis-bot:
+  redis-job:
+
+volumes:
+  terraform:
+  sshkey:
+
+services:
+  redis:
+    image: redis:alpine
+    init: true
+    read_only: true
+    networks:
+      - redis-bot
+      - redis-job
+  job-runner:
+    build:
+      context: .
+      target: runtime-job-runner
+    image: strayer/valheim-dedicated-server:job-runner
+    init: true
+    read_only: true
+    networks:
+      - redis-job
+    volumes:
+      - terraform:/terraform
+      - sshkey:/sshkey
+      - ./backup:/backup
+    tmpfs:
+      - /tmp
+      - /root/.ansible
+    environment:
+      - RQ_REDIS_URL=redis://redis:6379/0
+      - REDIS_URL=redis://redis:6379/1
+      - BACKUP_PATH=/backup
+    env_file: ./job-runner.env
+  discord-bot:
+    build:
+      context: .
+      target: runtime-discord-bot
+    image: strayer/valheim-dedicated-server:discord-bot
+    init: true
+    read_only: true
+    networks:
+      - redis-bot
+    environment:
+      - RQ_REDIS_URL=redis://redis:6379/0
+      - REDIS_URL=redis://redis:6379/1
+    env_file: ./discord-bot.env

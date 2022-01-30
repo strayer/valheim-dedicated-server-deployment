@@ -41,3 +41,8 @@ inventory
 
 # environment configuration with secrets
 .envrc
+discord-bot.env
+job-runner.env
+
+# Python
+__pycache__/

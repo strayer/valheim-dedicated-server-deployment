@@ -1,4 +1,4 @@
-- hosts: valheim_server
+- hosts: all
   remote_user: root
   roles:
     - harden_ssh

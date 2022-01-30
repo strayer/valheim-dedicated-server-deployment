@@ -9,7 +9,18 @@ terraform {
       version = "~> 3.0"
     }
   }
+
+  cloud {
+    organization = "gru-earth"
+
+    workspaces {
+      name = "valheim-dedicated-server"
+    }
+  }
 }
+
+variable "cloud_organization" {}
+variable "cloud_workspace" {}
 
 variable "hcloud_token" {
   sensitive = true
@@ -31,12 +42,12 @@ variable "server_subdomain" {
   sensitive = true
 }
 
-variable "ssh_key_fingerprint" {
-  sensitive = true
-}
-
 variable "hcloud_volume_name" {
 }
+
+variable "local_ipv4" {}
+
+variable "ssh_pubkey" {}
 
 # Configure the Hetzner Cloud Provider
 provider "hcloud" {
@@ -50,14 +61,6 @@ provider "cloudflare" {
 
 data "cloudflare_zone" "gru" {
   name = var.zone_name
-}
-
-data "http" "local_ipv4" {
-  url = "http://ipv4.icanhazip.com"
-}
-
-data "http" "local_ipv6" {
-  url = "http://ipv6.icanhazip.com"
 }
 
 resource "cloudflare_record" "valheim_server_ipv4" {
@@ -76,8 +79,15 @@ resource "cloudflare_record" "valheim_server_ipv6" {
   ttl     = 60
 }
 
-data "hcloud_ssh_key" "ssh-key" {
-  fingerprint = var.ssh_key_fingerprint
+resource "hcloud_ssh_key" "ansible" {
+  name       = "Ansible"
+  public_key = var.ssh_pubkey
+}
+
+data "hcloud_ssh_keys" "all_keys" {
+  depends_on = [
+    hcloud_ssh_key.ansible,
+  ]
 }
 
 data "hcloud_volume" "valheim-home" {
@@ -101,8 +111,7 @@ resource "hcloud_firewall" "valheim-firewall" {
     protocol  = "tcp"
     port      = "22"
     source_ips = [
-      "${chomp(data.http.local_ipv4.body)}/32",
-      "${chomp(data.http.local_ipv6.body)}/128",
+      "${var.local_ipv4}/32",
     ]
   }
 
@@ -123,7 +132,7 @@ resource "hcloud_server" "valheim-server" {
   server_type = "ccx12"
   location    = "nbg1"
 
-  ssh_keys     = [data.hcloud_ssh_key.ssh-key.id]
+  ssh_keys     = data.hcloud_ssh_keys.all_keys.ssh_keys.*.name
   firewall_ids = [hcloud_firewall.valheim-firewall.id]
 }
 
@@ -139,16 +148,5 @@ resource "hcloud_volume_attachment" "valheim-home-to-server" {
   automount = true
 }
 
-resource "local_file" "inventory" {
-  content = templatefile("${path.module}/inventory.tpl",
-    {
-      valheim_server_ip = hcloud_server.valheim-server.ipv4_address
-    }
-  )
-  filename = "inventory"
-}
-
-resource "local_file" "server_ip" {
-  content = hcloud_server.valheim-server.ipv4_address
-  filename = "server_ip.txt"
-}
+output "server_ip" { value = hcloud_server.valheim-server.ipv4_address }
+output "volume_id" { value = data.hcloud_volume.valheim-home.id }
