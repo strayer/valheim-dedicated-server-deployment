@@ -20,7 +20,7 @@ services:
     build:
       context: .
       target: runtime-job-runner
-    image: strayer/valheim-dedicated-server:job-runner
+    image: ghcr.io/strayer/valheim-dedicated-server/job-runner:latest
     init: true
     read_only: true
     networks:
@@ -41,7 +41,7 @@ services:
     build:
       context: .
       target: runtime-discord-bot
-    image: strayer/valheim-dedicated-server:discord-bot
+    image: ghcr.io/strayer/valheim-dedicated-server/discord-bot:latest
     init: true
     read_only: true
     networks:
