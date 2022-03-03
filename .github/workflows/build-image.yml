@@ -35,3 +35,18 @@ jobs:
           target: runtime-discord-bot
           tags: |
             ghcr.io/strayer/valheim-dedicated-server/discord-bot:latest
+      - name: Build valheim container image
+        uses: docker/build-push-action@v2
+        with:
+          push: true
+          target: valheim
+          file: Dockerfile.steamcmd
+          tags: |
+            ghcr.io/strayer/valheim-dedicated-server/valheim:latest
+      - name: Build backup container image
+        uses: docker/build-push-action@v2
+        with:
+          push: true
+          file: Dockerfile.backup
+          tags: |
+            ghcr.io/strayer/valheim-dedicated-server/backup:latest

@@ -1,0 +1,83 @@
+FROM debian:11 AS steamcmd
+
+RUN apt-get update && apt-get full-upgrade -y && rm -rv /var/lib/apt/lists
+
+ENV LC_ALL en_US.UTF-8
+ENV LANG en_US.UTF-8
+
+RUN apt-get update && \
+  apt-get install -y locales && \
+  rm -rf /var/lib/apt/lists && \
+  sed -i "/$LANG/s/^# //g" /etc/locale.gen && \
+  locale-gen && \
+  rm -rf /var/lib/apt/lists
+
+# dig & bind9-dnsutils (dig) for Discord webhooks
+RUN apt-get update && \
+  apt-get install --no-install-recommends -y \
+    lib32gcc-s1 curl ca-certificates \
+    jq bind9-dnsutils \
+    && \
+  rm -rf /var/lib/apt/lists
+
+ENV STEAMCMD_PATH /opt/steamcmd
+ENV GAMEDATA_PATH /gamedata
+
+RUN useradd -u 1000 -m steam && \
+  mkdir -p /home/steam/Steam/logs/ && \
+  ln -s /dev/stdout /home/steam/Steam/logs/stderr.txt
+
+COPY docker/install-steamcmd.sh \
+  docker/update-steamcmd.sh \
+  docker/install-or-update-game.sh \
+  docker/notify-discord-server-starting.sh \
+  docker/entrypoint.sh \
+  /opt/bin/
+
+RUN mkdir "$GAMEDATA_PATH" && chown steam:steam "$GAMEDATA_PATH"
+
+USER steam
+
+WORKDIR ${STEAMCMD_PATH}
+
+ENTRYPOINT [ "/opt/bin/entrypoint.sh" ]
+
+#
+# Valheim
+#
+
+FROM steamcmd AS valheim
+
+ENV STEAMAPPID 896660
+ENV GAME_NAME valheim
+ENV GAME_DISPLAY_NAME Valheim
+ENV GAME_PATH /opt/valheim
+
+COPY docker/valheim/start.sh /opt/bin/start-valheim.sh
+
+RUN mkdir -p /home/steam/.config/unity3d/IronGate/ && ln -s "$GAMEDATA_PATH" /home/steam/.config/unity3d/IronGate/Valheim
+
+WORKDIR $GAME_PATH
+
+STOPSIGNAL SIGINT
+
+CMD [ "/opt/bin/start-valheim.sh" ]
+
+#
+# Project Zomboid
+#
+
+FROM steamcmd AS zomboid
+
+ENV STEAMAPPID 380870
+ENV GAME_NAME zomboid
+ENV GAME_DISPLAY_NAME "Project Zomboid"
+ENV GAME_PATH /opt/zomboid
+
+# COPY docker/valheim/start.sh /opt/bin/start-valheim.sh
+
+# RUN mkdir -p /home/steam/.config/unity3d/IronGate/ && ln -s "$GAMEDATA_PATH" /home/steam/.config/unity3d/IronGate/Valheim
+
+WORKDIR $GAME_PATH
+
+CMD [ "/opt/bin/start-valheim.sh" ]

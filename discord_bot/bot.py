@@ -9,6 +9,8 @@ import jobs
 GUILD_ID = int(os.environ["GUILD_ID"])
 ALLOWED_CHANNEL_IDS = os.environ["CHANNEL_IDS"].split(",")
 
+COMMAND_PREFIX = "dev-" if os.environ["ENV"] == "dev" else ""
+
 bot = lightbulb.BotApp(token=os.environ["BOT_TOKEN"])
 
 
@@ -65,7 +67,7 @@ def set_cooldown(ctx: lightbulb.SlashContext, seconds: int) -> None:
 
 @bot.command
 @lightbulb.command(
-    "start-valheim", "Starts the Valheim dedicated server.", guilds=[GUILD_ID]
+    f"{COMMAND_PREFIX}start-valheim", "Starts the Valheim dedicated server.", guilds=[GUILD_ID]
 )
 @lightbulb.implements(lightbulb.SlashCommand)
 async def start_valheim(ctx: lightbulb.SlashContext) -> None:
@@ -82,7 +84,7 @@ async def start_valheim(ctx: lightbulb.SlashContext) -> None:
 
 @bot.command
 @lightbulb.command(
-    "stop-valheim", "Stops the Valheim dedicated server.", guilds=[GUILD_ID]
+    f"{COMMAND_PREFIX}stop-valheim", "Stops the Valheim dedicated server.", guilds=[GUILD_ID]
 )
 @lightbulb.implements(lightbulb.SlashCommand)
 async def stop_valheim(ctx: lightbulb.SlashContext) -> None:
@@ -98,7 +100,7 @@ async def stop_valheim(ctx: lightbulb.SlashContext) -> None:
 
 
 @bot.command
-@lightbulb.command("ping", "pong?", guilds=[GUILD_ID])
+@lightbulb.command(f"{COMMAND_PREFIX}ping", "pong?", guilds=[GUILD_ID])
 @lightbulb.implements(lightbulb.SlashCommand)
 async def ping(ctx: lightbulb.SlashContext) -> None:
     log_command(ctx)

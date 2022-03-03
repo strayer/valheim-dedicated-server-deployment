@@ -58,9 +58,6 @@ RUN export PACKAGES="curl gnupg libdigest-sha-perl unzip" && \
   apt-get purge -y --auto-remove $PACKAGES && \
   rm -rf /var/lib/apt/lists
 
-# Install ansible
-RUN PIP_NO_CACHE_DIR=on pip install ansible==5.2.0
-
 RUN apt-get update && \
   apt-get install --no-install-recommends -y ca-certificates curl openssh-client rsync bzip2 jq && \
   rm -rf /var/lib/apt/lists
@@ -71,11 +68,11 @@ COPY --from=build /runtime /usr/local
 COPY --from=build /app/ /app/
 
 COPY scripts/ /app/scripts/
-COPY terraform/main.tf terraform/.terraform.lock.hcl terraform/terraform-entrypoint.sh /app/terraform/
-COPY ansible/ /app/ansible/
+COPY terraform/terraform-entrypoint.sh /app/terraform/
+
+COPY terraform/valheim/main.tf terraform/valheim/.terraform.lock.hcl terraform/valheim/cloud-init.tftpl /app/terraform/valheim/
 
 ENV TF_DATA_DIR=/terraform/init
-ENV TF_CLI_CONFIG_FILE=/terraform/terraform.rc
 
 ENTRYPOINT [ "/app/terraform/terraform-entrypoint.sh" ]
 

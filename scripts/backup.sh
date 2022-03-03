@@ -5,11 +5,12 @@ SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 . "$SCRIPT_DIR/_base.sh"
 
 export_server_ip
-export_volume_id
+
+ssh -i "/sshkey/sshkey.$GAME_NAME" -o "StrictHostKeyChecking no" "root@$SERVER_IP" "docker run --rm --read-only -v /gamedata:/gamedata --env-file /env-backup --tmpfs /tmp --add-host \$(cat /restic-host) -e BACKUP_TAG=after-session ghcr.io/strayer/valheim-dedicated-server/backup:latest backup.sh"
 
 mkdir -p "$BACKUP_PATH/current"
 
 cd "$BACKUP_PATH"
-rsync --delete -avP -e "ssh -i /sshkey/sshkey -o \"StrictHostKeyChecking no\"" "root@$SERVER_IP:/mnt/HC_Volume_${HCLOUD_VOLUME_ID}/valheim-home/.config/unity3d/IronGate/Valheim/" current/
+rsync --delete -avP -e "ssh -i /sshkey/sshkey.$GAME_NAME -o \"StrictHostKeyChecking no\"" "root@$SERVER_IP:/gamedata/" current/
 cd current
 tar cjf "../backup_$(date +"%FT%H%M").tar.bz2" -- *

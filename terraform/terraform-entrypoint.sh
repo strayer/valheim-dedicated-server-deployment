@@ -3,15 +3,11 @@ set -euo pipefail
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
-cat >/terraform/terraform.rc <<EOL
-credentials "app.terraform.io" {
-  token = "${TERRAFORM_CLOUD_TOKEN}"
-}
-EOL
-
-(
-  cd "$SCRIPT_DIR/../terraform"
-  terraform init -lockfile=readonly
-);
+for game in valheim; do
+  (
+    cd "$SCRIPT_DIR/../terraform/$game"
+    terraform init -lockfile=readonly -backend-config="bucket=$TERRAFORM_BACKEND_BUCKET"
+  );
+done
 
 exec "$@"
