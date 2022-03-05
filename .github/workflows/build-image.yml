@@ -43,6 +43,14 @@ jobs:
           file: Dockerfile.steamcmd
           tags: |
             ghcr.io/strayer/valheim-dedicated-server/valheim:latest
+      - name: Build zomboid container image
+        uses: docker/build-push-action@v2
+        with:
+          push: true
+          target: zomboid
+          file: Dockerfile.steamcmd
+          tags: |
+            ghcr.io/strayer/valheim-dedicated-server/zomboid:latest
       - name: Build backup container image
         uses: docker/build-push-action@v2
         with:

@@ -69,15 +69,25 @@ CMD [ "/opt/bin/start-valheim.sh" ]
 
 FROM steamcmd AS zomboid
 
+EXPOSE 8766/udp
+EXPOSE 8767/udp
+EXPOSE 16261/udp
+EXPOSE 16262-16272/tcp
+
 ENV STEAMAPPID 380870
 ENV GAME_NAME zomboid
 ENV GAME_DISPLAY_NAME "Project Zomboid"
 ENV GAME_PATH /opt/zomboid
 
-# COPY docker/valheim/start.sh /opt/bin/start-valheim.sh
+USER root
+RUN apt-get update && apt-get install -y screen && rm -rf /var/lib/apt/lists
+USER steam
 
-# RUN mkdir -p /home/steam/.config/unity3d/IronGate/ && ln -s "$GAMEDATA_PATH" /home/steam/.config/unity3d/IronGate/Valheim
+COPY docker/zomboid/start.sh /opt/bin/start-zomboid.sh
+COPY docker/zomboid/stop.sh /opt/bin/stop-zomboid.sh
+
+RUN ln -s "$GAMEDATA_PATH" /home/steam/Zomboid
 
 WORKDIR $GAME_PATH
 
-CMD [ "/opt/bin/start-valheim.sh" ]
+CMD [ "/opt/bin/start-zomboid.sh" ]

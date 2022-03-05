@@ -7,7 +7,12 @@ SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 export_server_ip
 
 echo "Stopping $GAME_DISPLAY_NAME server…"
-ssh -i "/sshkey/sshkey.$GAME_NAME" -o "StrictHostKeyChecking no" "root@$SERVER_IP" "docker kill --signal=SIGINT $GAME_NAME-server && docker wait $GAME_NAME-server"
+if [ "$GAME_NAME" = "valheim" ]; then
+  ssh -i "/sshkey/sshkey.$GAME_NAME" -o "StrictHostKeyChecking no" "root@$SERVER_IP" "docker kill --signal=SIGINT $GAME_NAME-server && docker wait $GAME_NAME-server"
+fi
+if [ "$GAME_NAME" = "zomboid" ]; then
+  ssh -i "/sshkey/sshkey.$GAME_NAME" -o "StrictHostKeyChecking no" "root@$SERVER_IP" "docker exec $GAME_NAME-server /opt/bin/stop-zomboid.sh && docker wait $GAME_NAME-server"
+fi
 sleep 5
 
 echo "Backing up gamedata…"
