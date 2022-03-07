@@ -3,7 +3,10 @@ set -euo pipefail
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
-for game in valheim; do
+for game in valheim zomboid; do
+  export TF_DATA_DIR="$TF_DATA_DIR_BASE"/"$game"
+  mkdir -p "$TF_DATA_DIR"
+
   (
     cd "$SCRIPT_DIR/../terraform/$game"
     terraform init -lockfile=readonly -backend-config="bucket=$TERRAFORM_BACKEND_BUCKET"

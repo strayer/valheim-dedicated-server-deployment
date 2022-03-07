@@ -3,6 +3,7 @@ from rq import Queue
 from loguru import logger
 import redis
 import valheim_server
+import zomboid_server
 import db
 
 _QUEUE = None
@@ -29,3 +30,17 @@ def stop_valheim_server() -> None:
         logger.info("Stopping Valheim server")
         valheim_server.stop_server()
         logger.info("Finished stopping Valheim server")
+
+
+def start_zomboid_server() -> None:
+    with db.get_redis().lock("zomboid_server"):
+        logger.info("Starting Project Zomboid server")
+        zomboid_server.start_server()
+        logger.info("Finished starting Project Zomboid server")
+
+
+def stop_zomboid_server() -> None:
+    with db.get_redis().lock("zomboid_server"):
+        logger.info("Stopping Project Zomboid server")
+        zomboid_server.stop_server()
+        logger.info("Finished stopping Project Zomboid server")

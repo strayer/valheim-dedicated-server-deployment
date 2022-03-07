@@ -10,3 +10,9 @@ function export_server_ip() {
 	SERVER_IP="$("terraform" output -raw server_ip)"
 	popd
 }
+
+function export_terraform_data_dir() {
+  export TF_DATA_DIR="$TF_DATA_DIR_BASE"/"$GAME_NAME"
+
+  mkdir -p "$TF_DATA_DIR"
+}

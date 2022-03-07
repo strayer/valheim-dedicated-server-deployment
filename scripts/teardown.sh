@@ -5,6 +5,7 @@ SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 . "$SCRIPT_DIR/_base.sh"
 
 export_server_ip
+export_terraform_data_dir
 
 echo "Stopping $GAME_DISPLAY_NAME server…"
 if [ "$GAME_NAME" = "valheim" ]; then
@@ -26,9 +27,16 @@ terraform destroy -auto-approve -var="ssh_pubkey=foobar"
 message="$GAME_DISPLAY_NAME server destroyed 🧨💥"
 json_message=$(jq -n --arg content "$message" '{$content}')
 
+if [ "$GAME_NAME" = "valheim" ]; then
+  discord_channel_webhook="$TF_VAR_valheim_discord_channel_webhook"
+fi
+if [ "$GAME_NAME" = "zomboid" ]; then
+  discord_channel_webhook="$TF_VAR_zomboid_discord_channel_webhook"
+fi
+
 curl -i \
   -H "Accept: application/json" \
   -H "Content-Type: application/json" \
   -X POST \
   --data "$json_message" \
-  "$DISCORD_MAIN_CHANNEL_WEBHOOK"
+  "$discord_channel_webhook"

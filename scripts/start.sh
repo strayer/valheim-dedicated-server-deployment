@@ -4,6 +4,8 @@ set -euo pipefail
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 . "$SCRIPT_DIR/_base.sh"
 
+export_terraform_data_dir
+
 if [ ! -e "/sshkey/sshkey.$GAME_NAME" ]; then
   ssh-keygen -t ed25519 -f /sshkey/sshkey."$GAME_NAME" -q -N ""
 fi
