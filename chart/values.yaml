@@ -1,0 +1,71 @@
+# Default values for chart.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+discord_bot:
+  image:
+    repository: ghcr.io/strayer/valheim-dedicated-server/discord-bot
+    pullPolicy: IfNotPresent
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: ""
+  # defaults to fullname-discord_bot
+  secretRef: ""
+  # prefixes bot commands with "dev-" to not interfere with production deployments
+  developmentMode: false
+job_runner:
+  image:
+    repository: ghcr.io/strayer/valheim-dedicated-server/job-runner
+    pullPolicy: IfNotPresent
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: ""
+  # defaults to fullname-job_runer
+  secretRef: ""
+  volumes:
+    - name: sshkey
+      emptyDir: {}
+    - name: terraform
+      emptyDir: {}
+    # backup should really be a safe location instead!
+    - name: backup
+      emptyDir: {}
+  env:
+    TERRAFORM_BACKEND_BUCKET: "terraform"
+    TF_VAR_zone_name: "example.tld"
+    TF_VAR_s3_hostname: "minio.localdomain"
+    TF_VAR_s3_ip: "1.2.3.4"
+    TF_VAR_valheim_hcloud_volume_name: "valheim-data"
+    TF_VAR_valheim_server_subdomain: "valheim"
+    TF_VAR_valheim_server_name: "valheim"
+    TF_VAR_valheim_server_world: "valheim"
+    TF_VAR_zomboid_hcloud_volume_name: "zomboid-data"
+    TF_VAR_zomboid_server_subdomain: "zomboid"
+    TF_VAR_zomboid_servername: "zomboid"
+
+nameOverride: ""
+fullnameOverride: ""
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+redis:
+  architecture: standalone
+  auth:
+    enabled: false
+  master:
+    persistence:
+      enabled: false

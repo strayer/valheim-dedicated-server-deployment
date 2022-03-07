@@ -11,6 +11,9 @@ ssh -i "/sshkey/sshkey.$GAME_NAME" -o "StrictHostKeyChecking no" "root@$SERVER_I
 mkdir -p "$BACKUP_PATH/$GAME_NAME/current"
 
 cd "$BACKUP_PATH/$GAME_NAME"
-rsync --delete -avP -e "ssh -i /sshkey/sshkey.$GAME_NAME -o \"StrictHostKeyChecking no\"" "root@$SERVER_IP:/gamedata/" current/
+rsync --delete -avP --no-o --no-g -e "ssh -i /sshkey/sshkey.$GAME_NAME -o \"StrictHostKeyChecking no\"" "root@$SERVER_IP:/gamedata/" current/
+
+sleep 10
+
 cd current
-tar cjf "../backup_$(date +"%FT%H%M").tar.bz2" -- *
+tar cjf "../backup_$(date +"%FT%H%M").tar.bz2" --exclude='*/.fuse_hidden*' -- *
