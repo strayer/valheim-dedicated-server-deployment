@@ -4,7 +4,7 @@
 
 discord_bot:
   image:
-    repository: ghcr.io/strayer/valheim-dedicated-server/discord-bot
+    repository: ghcr.io/strayer/game-server-deployment-discord-bot/discord-bot
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
     tag: ""
@@ -14,7 +14,7 @@ discord_bot:
   developmentMode: false
 job_runner:
   image:
-    repository: ghcr.io/strayer/valheim-dedicated-server/job-runner
+    repository: ghcr.io/strayer/game-server-deployment-discord-bot/job-runner
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
     tag: ""
@@ -31,7 +31,7 @@ job_runner:
   env:
     TERRAFORM_BACKEND_BUCKET: "terraform"
     TF_VAR_zone_name: "example.tld"
-    TF_VAR_s3_hostname: "minio.localdomain"
+    TF_VAR_s3_hostname: "s3.example.tld"
     TF_VAR_s3_ip: "1.2.3.4"
     TF_VAR_valheim_hcloud_volume_name: "valheim-data"
     TF_VAR_valheim_server_subdomain: "valheim"

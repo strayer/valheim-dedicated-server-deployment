@@ -27,14 +27,14 @@ jobs:
           push: true
           target: runtime-job-runner
           tags: |
-            ghcr.io/strayer/valheim-dedicated-server/job-runner:latest
+            ghcr.io/strayer/game-server-deployment-discord-bot/job-runner:latest
       - name: Build discord-bot container image
         uses: docker/build-push-action@v2
         with:
           push: true
           target: runtime-discord-bot
           tags: |
-            ghcr.io/strayer/valheim-dedicated-server/discord-bot:latest
+            ghcr.io/strayer/game-server-deployment-discord-bot/discord-bot:latest
       - name: Build valheim container image
         uses: docker/build-push-action@v2
         with:
@@ -42,7 +42,7 @@ jobs:
           target: valheim
           file: Dockerfile.steamcmd
           tags: |
-            ghcr.io/strayer/valheim-dedicated-server/valheim:latest
+            ghcr.io/strayer/game-server-deployment-discord-bot/valheim:latest
       - name: Build zomboid container image
         uses: docker/build-push-action@v2
         with:
@@ -50,11 +50,11 @@ jobs:
           target: zomboid
           file: Dockerfile.steamcmd
           tags: |
-            ghcr.io/strayer/valheim-dedicated-server/zomboid:latest
+            ghcr.io/strayer/game-server-deployment-discord-bot/zomboid:latest
       - name: Build backup container image
         uses: docker/build-push-action@v2
         with:
           push: true
           file: Dockerfile.backup
           tags: |
-            ghcr.io/strayer/valheim-dedicated-server/backup:latest
+            ghcr.io/strayer/game-server-deployment-discord-bot/backup:latest
