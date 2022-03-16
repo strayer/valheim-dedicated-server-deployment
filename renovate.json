@@ -1,10 +1,10 @@
 {
   "extends": ["config:base"],
+  "lockFileMaintenance": { "enabled": true },
   "packageRules": [
     {
       "matchManagers": ["poetry", "terraform", "helmv3"],
-      "rangeStrategy": "update-lockfile",
-      "lockFileMaintenance": { "enabled": true }
+      "rangeStrategy": "update-lockfile"
     }
   ]
 }
