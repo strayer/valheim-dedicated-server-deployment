@@ -12,6 +12,6 @@
       "matchUpdateTypes": ["patch"],
       "ignoreTests": true,
       "automerge": true
-    },
+    }
   ]
 }
