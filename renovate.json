@@ -5,6 +5,13 @@
     {
       "matchManagers": ["poetry", "terraform", "helmv3"],
       "rangeStrategy": "update-lockfile"
-    }
+    },
+    {
+      "matchManagers": ["helmv3"],
+      "matchPackageNames": ["redis"],
+      "matchUpdateTypes": ["patch"],
+      "ignoreTests": true,
+      "automerge": true
+    },
   ]
 }
