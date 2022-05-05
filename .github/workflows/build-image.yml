@@ -28,21 +28,21 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build job-runner container image
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v3
         with:
           push: true
           target: runtime-job-runner
           tags: |
             ghcr.io/strayer/game-server-deployment-discord-bot/job-runner:latest
       - name: Build discord-bot container image
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v3
         with:
           push: true
           target: runtime-discord-bot
           tags: |
             ghcr.io/strayer/game-server-deployment-discord-bot/discord-bot:latest
       - name: Build valheim container image
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v3
         with:
           push: true
           target: valheim
@@ -50,7 +50,7 @@ jobs:
           tags: |
             ghcr.io/strayer/game-server-deployment-discord-bot/valheim:latest
       - name: Build zomboid container image
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v3
         with:
           push: true
           target: zomboid
@@ -58,7 +58,7 @@ jobs:
           tags: |
             ghcr.io/strayer/game-server-deployment-discord-bot/zomboid:latest
       - name: Build backup container image
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v3
         with:
           push: true
           file: Dockerfile.backup
