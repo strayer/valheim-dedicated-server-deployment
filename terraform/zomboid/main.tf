@@ -224,7 +224,7 @@ resource "hcloud_firewall" "zomboid-firewall" {
 resource "hcloud_server" "zomboid-server" {
   name        = "zomboid-server"
   image       = "debian-11"
-  server_type = "ccx12"
+  server_type = "ccx22"
   location    = "nbg1"
 
   ssh_keys     = data.hcloud_ssh_keys.all_keys.ssh_keys.*.name
