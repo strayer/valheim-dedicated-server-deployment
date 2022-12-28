@@ -13,7 +13,7 @@ hikari-lightbulb = "^2.3.0"
 rq = "^1.10.1"
 
 [tool.poetry.dev-dependencies]
-black = "^21.12b0"
+black = "^23.1a1"
 pylint = "^2.12.2"
 bandit = "^1.7.1"
 
