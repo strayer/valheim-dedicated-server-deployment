@@ -46,19 +46,19 @@ variable "zomboid_server_subdomain" {
   sensitive = true
 }
 
-variable "zomboid_restic_repo" {
+variable "restic_zomboid_repo" {
   sensitive = true
 }
 
-variable "zomboid_restic_password" {
+variable "restic_zomboid_password" {
   sensitive = true
 }
 
-variable "zomboid_restic_aws_access_key_id" {
+variable "restic_zomboid_aws_access_key_id" {
   sensitive = true
 }
 
-variable "zomboid_restic_aws_secret_access_key" {
+variable "restic_zomboid_aws_secret_access_key" {
   sensitive = true
 }
 
@@ -70,15 +70,15 @@ variable "s3_ip" {
   sensitive = true
 }
 
-variable "zomboid_wireguard_private_key" {
+variable "wireguard_zomboid_private_key" {
   sensitive = true
 }
 
-variable "zomboid_wireguard_restic_peer_psk" {
+variable "wireguard_zomboid_restic_peer_psk" {
   sensitive = true
 }
 
-variable "zomboid_wireguard_address" {
+variable "wireguard_zomboid_address" {
   sensitive = true
 }
 
@@ -230,16 +230,16 @@ resource "hcloud_server" "zomboid-server" {
   ssh_keys     = data.hcloud_ssh_keys.all_keys.ssh_keys.*.name
   firewall_ids = [hcloud_firewall.zomboid-firewall.id]
   user_data    = templatefile("${path.module}/cloud-init.tftpl", {
-    zomboid_restic_repo = var.zomboid_restic_repo,
-    zomboid_restic_password = var.zomboid_restic_password,
-    zomboid_restic_aws_access_key_id = var.zomboid_restic_aws_access_key_id,
-    zomboid_restic_aws_secret_access_key = var.zomboid_restic_aws_secret_access_key,
+    restic_zomboid_repo = var.restic_zomboid_repo,
+    restic_zomboid_password = var.restic_zomboid_password,
+    restic_zomboid_aws_access_key_id = var.restic_zomboid_aws_access_key_id,
+    restic_zomboid_aws_secret_access_key = var.restic_zomboid_aws_secret_access_key,
     s3_hostname = var.s3_hostname,
     s3_ip = var.s3_ip,
-    zomboid_wireguard_address = var.zomboid_wireguard_address,
-    zomboid_wireguard_private_key = var.zomboid_wireguard_private_key,
+    wireguard_zomboid_address = var.wireguard_zomboid_address,
+    wireguard_zomboid_private_key = var.wireguard_zomboid_private_key,
     wireguard_restic_peer_public_key = var.wireguard_restic_peer_public_key,
-    zomboid_wireguard_restic_peer_psk = var.zomboid_wireguard_restic_peer_psk,
+    wireguard_zomboid_restic_peer_psk = var.wireguard_zomboid_restic_peer_psk,
     wireguard_restic_peer_addresses = var.wireguard_restic_peer_addresses,
     wireguard_restic_peer_endpoint = var.wireguard_restic_peer_endpoint,
     volume_device_path = data.hcloud_volume.zomboid_data.linux_device,

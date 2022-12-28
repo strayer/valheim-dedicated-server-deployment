@@ -84,27 +84,27 @@ write_files:
   - owner: root:root
     path: /env-backup
     content: |
-      RESTIC_REPOSITORY=${ valheim_restic_repo }
-      RESTIC_PASSWORD=${ valheim_restic_password }
-      AWS_ACCESS_KEY_ID=${ valheim_restic_aws_access_key_id }
-      AWS_SECRET_ACCESS_KEY=${ valheim_restic_aws_secret_access_key }
+      RESTIC_REPOSITORY=${ restic_valheim_repo }
+      RESTIC_PASSWORD=${ restic_valheim_password }
+      AWS_ACCESS_KEY_ID=${ restic_valheim_aws_access_key_id }
+      AWS_SECRET_ACCESS_KEY=${ restic_valheim_aws_secret_access_key }
       GAME_NAME=valheim
       GAMEDATA_PATH=/gamedata
     permissions: '0600'
   - owner: root:root
     path: /restic-host
-    content: ${ s3_hostname }:${ s3_ip }
+    content: ${ restic_hostname }:${ restic_ip }
     permission: '0600'
   - owner: root:root
     path: /etc/wireguard/restic.conf
     content: |
       [Interface]
-      Address = ${ valheim_wireguard_address }
-      PrivateKey = ${ valheim_wireguard_private_key }
+      Address = ${ wireguard_valheim_address }
+      PrivateKey = ${ wireguard_valheim_private_key }
 
       [Peer]
       PublicKey = ${ wireguard_restic_peer_public_key }
-      PresharedKey = ${ valheim_wireguard_restic_peer_psk }
+      PresharedKey = ${ wireguard_valheim_restic_peer_psk }
       AllowedIPs = ${ wireguard_restic_peer_addresses }
       Endpoint = ${ wireguard_restic_peer_endpoint }
     permissions: '0600'
@@ -119,6 +119,7 @@ runcmd:
   - docker volume create steamcmd
   - mkdir /mnt/cloudvolume
   - mount ${ volume_device_path } /mnt/cloudvolume
+  - mkdir -p /mnt/cloudvolume/gamedata /mnt/cloudvolume/game
   - ln -s /mnt/cloudvolume/gamedata /gamedata
   - ln -s /mnt/cloudvolume/game /opt/valheim
   - chown -R 1000 /gamedata /opt/valheim /mnt/cloudvolume/gamedata /mnt/cloudvolume/game

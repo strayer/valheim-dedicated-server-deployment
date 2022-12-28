@@ -1,4 +1,4 @@
-FROM python:3.10 as build
+FROM python:3.11 as build
 
 ENV PYTHONFAULTHANDLER=1 \
   PYTHONUNBUFFERED=1 \
@@ -9,7 +9,7 @@ ENV PYTHONFAULTHANDLER=1 \
   POETRY_NO_INTERACTION=1 \
   POETRY_VIRTUALENVS_CREATE=false \
   PATH="$PATH:/runtime/bin" \
-  PYTHONPATH="$PYTHONPATH:/runtime/lib/python3.10/site-packages" \
+  PYTHONPATH="$PYTHONPATH:/runtime/lib/python3.11/site-packages" \
   # Versions:
   POETRY_VERSION=1.1.12
 
@@ -27,7 +27,7 @@ COPY discord_bot/ ./discord_bot/
 # prepend poetry and venv to path
 ENV PATH="$POETRY_HOME/bin:$VENV_PATH/bin:$PATH"
 
-FROM python:3.10-slim AS runtime-discord-bot
+FROM python:3.11-slim AS runtime-discord-bot
 
 WORKDIR /app/discord_bot
 
@@ -36,23 +36,24 @@ COPY --from=build /app/ /app/
 
 CMD [ "python", "bot.py" ]
 
-FROM python:3.10-slim AS runtime-job-runner
+FROM python:3.11-slim AS runtime-job-runner
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 # Install terraform
-ARG TERRAFORM_VERSION=1.1.4
+ARG TERRAFORM_VERSION=1.3.6
 RUN export PACKAGES="curl gnupg libdigest-sha-perl unzip" && \
+  export TERRAFORM_ARCH="$(arch | sed s/aarch64/arm64/ | sed s/x86_64/amd64/)" && \
   apt-get update && apt-get install --no-install-recommends -y $PACKAGES  && \
   mkdir /terraformdl && \
   cd /terraformdl && \
   curl -L https://keybase.io/hashicorp/pgp_keys.asc | gpg --import - && \
-  curl -LO https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip && \
+  curl -LO https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_${TERRAFORM_ARCH}.zip && \
   curl -LO https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_SHA256SUMS.sig && \
   curl -LO https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_SHA256SUMS && \
   gpg --verify terraform_${TERRAFORM_VERSION}_SHA256SUMS.sig terraform_${TERRAFORM_VERSION}_SHA256SUMS && \
   shasum --algorithm 256 --ignore-missing --check terraform_${TERRAFORM_VERSION}_SHA256SUMS && \
-  unzip terraform_${TERRAFORM_VERSION}_linux_amd64.zip && \
+  unzip terraform_${TERRAFORM_VERSION}_linux_${TERRAFORM_ARCH}.zip && \
   mv terraform /usr/local/bin && \
   chmod +x /usr/local/bin/terraform && \
   apt-get purge -y --auto-remove $PACKAGES && \

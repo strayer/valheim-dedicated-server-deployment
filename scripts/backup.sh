@@ -12,6 +12,3 @@ mkdir -p "$BACKUP_PATH/$GAME_NAME/current"
 
 cd "$BACKUP_PATH/$GAME_NAME"
 rsync --delete -avP --no-o --no-g -e "ssh -i /sshkey/sshkey.$GAME_NAME -o \"StrictHostKeyChecking no\"" "root@$SERVER_IP:/gamedata/" current/
-
-cd current
-tar cjf "../backup_$(date +"%FT%H%M").tar.bz2" -- *

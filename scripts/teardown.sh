@@ -4,8 +4,8 @@ set -euo pipefail
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 . "$SCRIPT_DIR/_base.sh"
 
-export_server_ip
 export_terraform_data_dir
+export_server_ip
 
 echo "Stopping $GAME_DISPLAY_NAME server…"
 if [ "$GAME_NAME" = "valheim" ]; then
