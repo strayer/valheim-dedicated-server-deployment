@@ -11,7 +11,7 @@ ENV PYTHONFAULTHANDLER=1 \
   PATH="$PATH:/runtime/bin" \
   PYTHONPATH="$PYTHONPATH:/runtime/lib/python3.11/site-packages" \
   # Versions:
-  POETRY_VERSION=1.1.12
+  POETRY_VERSION=1.2.2
 
 RUN pip install "poetry==$POETRY_VERSION"
 
