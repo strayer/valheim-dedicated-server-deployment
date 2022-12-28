@@ -1,9 +1,0 @@
-apiVersion: v2
-name: game-server-deployment-discord-bot
-type: application
-version: "1.0.0"
-appVersion: "latest"
-dependencies:
-  - name: redis
-    version: "16.9.11"
-    repository: https://charts.bitnami.com/bitnami
