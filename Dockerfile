@@ -1,4 +1,4 @@
-FROM python:3.11 as build
+FROM python:3.11.0 as build
 
 ENV PYTHONFAULTHANDLER=1 \
   PYTHONUNBUFFERED=1 \
@@ -27,7 +27,7 @@ COPY discord_bot/ ./discord_bot/
 # prepend poetry and venv to path
 ENV PATH="$POETRY_HOME/bin:$VENV_PATH/bin:$PATH"
 
-FROM python:3.11-slim AS runtime-discord-bot
+FROM python:3.11.0-slim AS runtime-discord-bot
 
 WORKDIR /app/discord_bot
 
@@ -36,7 +36,7 @@ COPY --from=build /app/ /app/
 
 CMD [ "python", "bot.py" ]
 
-FROM python:3.11-slim AS runtime-job-runner
+FROM python:3.11.0-slim AS runtime-job-runner
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
