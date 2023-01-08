@@ -62,11 +62,11 @@ variable "restic_valheim_aws_secret_access_key" {
   sensitive = true
 }
 
-variable "s3_hostname" {
+variable "restic_hostname" {
   sensitive = true
 }
 
-variable "s3_ip" {
+variable "restic_ip" {
   sensitive = true
 }
 
