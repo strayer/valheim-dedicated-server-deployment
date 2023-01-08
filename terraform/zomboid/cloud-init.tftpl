@@ -93,7 +93,7 @@ write_files:
     permissions: '0600'
   - owner: root:root
     path: /restic-host
-    content: ${ s3_hostname }:${ s3_ip }
+    content: ${ restic_hostname }:${ restic_ip }
     permission: '0600'
   - owner: root:root
     path: /etc/wireguard/restic.conf
