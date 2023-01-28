@@ -19,6 +19,9 @@ sleep 5
 echo "Backing up gamedata…"
 "$SCRIPT_DIR/backup.sh"
 
+# try to unmount the cloudvolume and poweroff to avoid possible data loss when destroying the server
+ssh -i "/sshkey/sshkey.$GAME_NAME" -o "StrictHostKeyChecking no" "root@$SERVER_IP" "umount /mnt/cloudvolume && poweroff" || true
+
 echo "Destroying resources…"
 
 cd "$SCRIPT_DIR"/../terraform/"$GAME_NAME"
