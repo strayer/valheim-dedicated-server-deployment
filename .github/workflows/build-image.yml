@@ -38,6 +38,7 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           push: true
+          provenance: false
           target: runtime-discord-bot
           tags: |
             ghcr.io/strayer/game-server-deployment-discord-bot/discord-bot:latest
@@ -45,6 +46,7 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           push: true
+          provenance: false
           target: valheim
           file: Dockerfile.steamcmd
           tags: |
@@ -53,6 +55,7 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           push: true
+          provenance: false
           target: zomboid
           file: Dockerfile.steamcmd
           tags: |
@@ -61,6 +64,7 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           push: true
+          provenance: false
           file: Dockerfile.backup
           tags: |
             ghcr.io/strayer/game-server-deployment-discord-bot/backup:latest
