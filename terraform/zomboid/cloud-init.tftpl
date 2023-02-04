@@ -111,7 +111,11 @@ write_files:
 
 packages:
   - docker-ce
+  - docker-ce-cli
+  - containerd.io
   - wireguard
+  - apparmor
+  - apparmor-utils
 
 runcmd:
   - systemctl enable wg-quick@restic
