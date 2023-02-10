@@ -137,6 +137,40 @@ async def stop_zomboid(ctx: lightbulb.SlashContext) -> None:
 
 
 @bot.command
+@lightbulb.command(
+    f"{COMMAND_PREFIX}start-factorio", "Starts the Factorio dedicated server.", guilds=[GUILD_ID]
+)
+@lightbulb.implements(lightbulb.SlashCommand)
+async def start_factorio(ctx: lightbulb.SlashContext) -> None:
+    if not await authorize(ctx):
+        return
+    if not await cooldown(ctx, 60):
+        return
+
+    log_command(ctx)
+    await ctx.respond("Server start trigger received, this may take a few minutes")
+
+    jobs.get_queue().enqueue(jobs.start_factorio_server)
+
+
+@bot.command
+@lightbulb.command(
+    f"{COMMAND_PREFIX}stop-factorio", "Stops the Factorio dedicated server.", guilds=[GUILD_ID]
+)
+@lightbulb.implements(lightbulb.SlashCommand)
+async def stop_factorio(ctx: lightbulb.SlashContext) -> None:
+    if not await authorize(ctx):
+        return
+    if not await cooldown(ctx, 60):
+        return
+
+    log_command(ctx)
+    await ctx.respond("Server stop trigger received, this may take a few minutes")
+
+    jobs.get_queue().enqueue(jobs.stop_factorio_server)
+
+
+@bot.command
 @lightbulb.command(f"{COMMAND_PREFIX}ping", "pong?", guilds=[GUILD_ID])
 @lightbulb.implements(lightbulb.SlashCommand)
 async def ping(ctx: lightbulb.SlashContext) -> None:
