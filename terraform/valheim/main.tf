@@ -135,6 +135,11 @@ data "hcloud_volume" "valheim_data" {
   name = var.valheim_hcloud_volume_name
 }
 
+data "hcloud_image" "debian-11" {
+  name              = "debian-11"
+  with_architecture = "x86"
+}
+
 resource "cloudflare_record" "valheim_server_ipv4" {
   zone_id = data.cloudflare_zone.zone.zone_id
   name    = var.valheim_server_subdomain
@@ -197,30 +202,30 @@ resource "hcloud_firewall" "valheim-firewall" {
 
 resource "hcloud_server" "valheim-server" {
   name        = "valheim-server"
-  image       = "debian-11"
+  image       = data.hcloud_image.debian-11.id
   server_type = "ccx12"
   location    = "nbg1"
 
   ssh_keys     = data.hcloud_ssh_keys.all_keys.ssh_keys.*.name
   firewall_ids = [hcloud_firewall.valheim-firewall.id]
-  user_data    = templatefile("${path.module}/cloud-init.tftpl", {
-    restic_valheim_repo = var.restic_valheim_repo,
-    restic_valheim_password = var.restic_valheim_password,
-    restic_valheim_aws_access_key_id = var.restic_valheim_aws_access_key_id,
+  user_data = templatefile("${path.module}/cloud-init.tftpl", {
+    restic_valheim_repo                  = var.restic_valheim_repo,
+    restic_valheim_password              = var.restic_valheim_password,
+    restic_valheim_aws_access_key_id     = var.restic_valheim_aws_access_key_id,
     restic_valheim_aws_secret_access_key = var.restic_valheim_aws_secret_access_key,
-    restic_hostname = var.restic_hostname,
-    restic_ip = var.restic_ip,
-    wireguard_valheim_address = var.wireguard_valheim_address,
-    wireguard_valheim_private_key = var.wireguard_valheim_private_key,
-    wireguard_restic_peer_public_key = var.wireguard_restic_peer_public_key,
-    wireguard_valheim_restic_peer_psk = var.wireguard_valheim_restic_peer_psk,
-    wireguard_restic_peer_addresses = var.wireguard_restic_peer_addresses,
-    wireguard_restic_peer_endpoint = var.wireguard_restic_peer_endpoint,
-    volume_device_path = data.hcloud_volume.valheim_data.linux_device,
-    valheim_server_name = var.valheim_server_name,
-    valheim_server_world = var.valheim_server_world,
-    valheim_server_password = var.valheim_server_password,
-    valheim_discord_channel_webhook = var.valheim_discord_channel_webhook
+    restic_hostname                      = var.restic_hostname,
+    restic_ip                            = var.restic_ip,
+    wireguard_valheim_address            = var.wireguard_valheim_address,
+    wireguard_valheim_private_key        = var.wireguard_valheim_private_key,
+    wireguard_restic_peer_public_key     = var.wireguard_restic_peer_public_key,
+    wireguard_valheim_restic_peer_psk    = var.wireguard_valheim_restic_peer_psk,
+    wireguard_restic_peer_addresses      = var.wireguard_restic_peer_addresses,
+    wireguard_restic_peer_endpoint       = var.wireguard_restic_peer_endpoint,
+    volume_device_path                   = data.hcloud_volume.valheim_data.linux_device,
+    valheim_server_name                  = var.valheim_server_name,
+    valheim_server_world                 = var.valheim_server_world,
+    valheim_server_password              = var.valheim_server_password,
+    valheim_discord_channel_webhook      = var.valheim_discord_channel_webhook
   })
 }
 
