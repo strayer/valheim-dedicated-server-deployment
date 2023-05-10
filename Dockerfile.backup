@@ -8,8 +8,8 @@ ARG RESTIC_HASHES_SIG=${RESTIC_DOWNLOAD_BASE}/SHA256SUMS.asc
 
 RUN apk add --no-cache gpgv gpg gnupg-keyboxd dirmngr gpg-agent curl coreutils && \
   curl -L --remote-name-all ${RESTIC_DOWNLOAD} ${RESTIC_HASHES} ${RESTIC_HASHES_SIG} && \
-  gpg --no-default-keyring --keyring trustedkeys.gpg --recv-keys CF8F18F2844575973F79D4E191A6868BD3F7A907 && \
-  gpgv SHA256SUMS.asc SHA256SUMS && \
+  gpg --keyserver hkp://keyserver.ubuntu.com --recv-keys  CF8F18F2844575973F79D4E191A6868BD3F7A907 && \
+  gpg --verify SHA256SUMS.asc && \
   sha256sum -c --ignore-missing SHA256SUMS && \
   bunzip2 restic_${RESTIC_VERSION}_linux_amd64.bz2 && \
   chmod +x restic_${RESTIC_VERSION}_linux_amd64 && \
