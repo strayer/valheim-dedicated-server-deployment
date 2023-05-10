@@ -6,7 +6,7 @@ ARG RESTIC_DOWNLOAD=${RESTIC_DOWNLOAD_BASE}/restic_${RESTIC_VERSION}_linux_amd64
 ARG RESTIC_HASHES=${RESTIC_DOWNLOAD_BASE}/SHA256SUMS
 ARG RESTIC_HASHES_SIG=${RESTIC_DOWNLOAD_BASE}/SHA256SUMS.asc
 
-RUN apk add --no-cache gpgv gpg dirmngr gpg-agent curl coreutils && \
+RUN apk add --no-cache gpgv gpg gnupg-keyboxd dirmngr gpg-agent curl coreutils && \
   curl -L --remote-name-all ${RESTIC_DOWNLOAD} ${RESTIC_HASHES} ${RESTIC_HASHES_SIG} && \
   gpg --no-default-keyring --keyring trustedkeys.gpg --recv-keys CF8F18F2844575973F79D4E191A6868BD3F7A907 && \
   gpgv SHA256SUMS.asc SHA256SUMS && \
