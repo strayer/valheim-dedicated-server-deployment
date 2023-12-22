@@ -158,10 +158,15 @@ resource "hcloud_firewall" "factorio-firewall" {
   }
 }
 
+data "hcloud_image" "debian-12" {
+  name              = "debian-12"
+  with_architecture = "x86"
+}
+
 resource "hcloud_server" "factorio-server" {
   name        = "factorio-server"
-  image       = "debian-11"
-  server_type = "ccx12"
+  image       = data.hcloud_image.debian-12.id
+  server_type = "ccx13"
   location    = "nbg1"
 
   ssh_keys     = data.hcloud_ssh_keys.all_keys.ssh_keys.*.name
