@@ -171,15 +171,13 @@ resource "hcloud_server" "factorio-server" {
 
   ssh_keys     = data.hcloud_ssh_keys.all_keys.ssh_keys.*.name
   firewall_ids = [hcloud_firewall.factorio-firewall.id]
-  user_data    = templatefile("${path.module}/cloud-init.tftpl", {
-    restic_factorio_repo = var.restic_factorio_repo,
-    restic_factorio_password = var.restic_factorio_password,
-    restic_factorio_aws_access_key_id = var.restic_factorio_aws_access_key_id,
+  user_data = templatefile("${path.module}/cloud-init.tftpl", {
+    restic_factorio_repo                  = var.restic_factorio_repo,
+    restic_factorio_password              = var.restic_factorio_password,
+    restic_factorio_aws_access_key_id     = var.restic_factorio_aws_access_key_id,
     restic_factorio_aws_secret_access_key = var.restic_factorio_aws_secret_access_key,
-    restic_hostname = "minio.gru.earth",
-    restic_ip = "116.203.31.163",
-    factorio_save_name = var.factorio_save_name,
-    factorio_discord_channel_webhook = var.factorio_discord_channel_webhook
+    factorio_save_name                    = var.factorio_save_name,
+    factorio_discord_channel_webhook      = var.factorio_discord_channel_webhook
   })
 }
 
