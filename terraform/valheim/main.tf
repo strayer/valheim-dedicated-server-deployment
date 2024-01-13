@@ -2,7 +2,7 @@ terraform {
   required_providers {
     hcloud = {
       source  = "hetznercloud/hcloud"
-      version = "1.38.2"
+      version = "1.44.1"
     }
     cloudflare = {
       source  = "cloudflare/cloudflare"
@@ -27,94 +27,73 @@ terraform {
 }
 
 variable "hcloud_token" {
+  type      = string
   sensitive = true
 }
 
 variable "cloudflare_email" {
+  type      = string
   sensitive = true
 }
 
 variable "cloudflare_api_key" {
+  type      = string
   sensitive = true
 }
 
 variable "zone_name" {
+  type      = string
   sensitive = true
 }
 
 variable "valheim_server_subdomain" {
+  type      = string
   sensitive = true
 }
 
 variable "restic_valheim_repo" {
+  type      = string
   sensitive = true
 }
 
 variable "restic_valheim_password" {
+  type      = string
   sensitive = true
 }
 
 variable "restic_valheim_aws_access_key_id" {
+  type      = string
   sensitive = true
 }
 
 variable "restic_valheim_aws_secret_access_key" {
-  sensitive = true
-}
-
-variable "restic_hostname" {
-  sensitive = true
-}
-
-variable "restic_ip" {
-  sensitive = true
-}
-
-variable "wireguard_valheim_private_key" {
-  sensitive = true
-}
-
-variable "wireguard_valheim_restic_peer_psk" {
-  sensitive = true
-}
-
-variable "wireguard_valheim_address" {
-  sensitive = true
-}
-
-variable "wireguard_restic_peer_addresses" {
-  sensitive = true
-}
-
-variable "wireguard_restic_peer_public_key" {
-  sensitive = true
-}
-
-variable "wireguard_restic_peer_endpoint" {
+  type      = string
   sensitive = true
 }
 
 variable "valheim_server_name" {
+  type      = string
   sensitive = true
 }
 
 variable "valheim_server_world" {
+  type      = string
   sensitive = true
 }
 
 variable "valheim_server_password" {
+  type      = string
   sensitive = true
 }
 
 variable "valheim_discord_channel_webhook" {
+  type      = string
   sensitive = true
 }
 
 variable "ssh_pubkey" {
+  type      = string
   sensitive = true
-}
-
-variable "valheim_hcloud_volume_name" {
 }
 
 # Configure the Hetzner Cloud Provider
@@ -129,15 +108,6 @@ provider "cloudflare" {
 
 data "cloudflare_zone" "zone" {
   name = var.zone_name
-}
-
-data "hcloud_volume" "valheim_data" {
-  name = var.valheim_hcloud_volume_name
-}
-
-data "hcloud_image" "debian-11" {
-  name              = "debian-11"
-  with_architecture = "x86"
 }
 
 resource "cloudflare_record" "valheim_server_ipv4" {
@@ -200,10 +170,15 @@ resource "hcloud_firewall" "valheim-firewall" {
   }
 }
 
+data "hcloud_image" "debian-12" {
+  name              = "debian-12"
+  with_architecture = "x86"
+}
+
 resource "hcloud_server" "valheim-server" {
   name        = "valheim-server"
-  image       = data.hcloud_image.debian-11.id
-  server_type = "ccx12"
+  image       = data.hcloud_image.debian-12.id
+  server_type = "ccx23"
   location    = "nbg1"
 
   ssh_keys     = data.hcloud_ssh_keys.all_keys.ssh_keys.*.name
@@ -213,15 +188,6 @@ resource "hcloud_server" "valheim-server" {
     restic_valheim_password              = var.restic_valheim_password,
     restic_valheim_aws_access_key_id     = var.restic_valheim_aws_access_key_id,
     restic_valheim_aws_secret_access_key = var.restic_valheim_aws_secret_access_key,
-    restic_hostname                      = var.restic_hostname,
-    restic_ip                            = var.restic_ip,
-    wireguard_valheim_address            = var.wireguard_valheim_address,
-    wireguard_valheim_private_key        = var.wireguard_valheim_private_key,
-    wireguard_restic_peer_public_key     = var.wireguard_restic_peer_public_key,
-    wireguard_valheim_restic_peer_psk    = var.wireguard_valheim_restic_peer_psk,
-    wireguard_restic_peer_addresses      = var.wireguard_restic_peer_addresses,
-    wireguard_restic_peer_endpoint       = var.wireguard_restic_peer_endpoint,
-    volume_device_path                   = data.hcloud_volume.valheim_data.linux_device,
     valheim_server_name                  = var.valheim_server_name,
     valheim_server_world                 = var.valheim_server_world,
     valheim_server_password              = var.valheim_server_password,
@@ -233,13 +199,6 @@ resource "hcloud_rdns" "valheim-server-ipv4" {
   server_id  = hcloud_server.valheim-server.id
   ip_address = hcloud_server.valheim-server.ipv4_address
   dns_ptr    = cloudflare_record.valheim_server_ipv4.hostname
-}
-
-
-resource "hcloud_volume_attachment" "valheim_data-to-server" {
-  volume_id = data.hcloud_volume.valheim_data.id
-  server_id = hcloud_server.valheim-server.id
-  automount = false
 }
 
 output "server_ip" { value = hcloud_server.valheim-server.ipv4_address }

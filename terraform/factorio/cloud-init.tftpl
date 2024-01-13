@@ -91,10 +91,6 @@ write_files:
       GAME_NAME=factorio
       GAMEDATA_PATH=/gamedata
     permissions: '0600'
-  - owner: root:root
-    path: /restic-host
-    content: ${ restic_hostname }:${ restic_ip }
-    permission: '0600'
 
 packages:
   - docker-ce
@@ -113,7 +109,6 @@ runcmd:
       -v /gamedata:/gamedata \
       --env-file /env-backup \
       --tmpfs /tmp \
-      --add-host $(cat /restic-host) \
       ghcr.io/strayer/game-server-deployment-discord-bot/backup:latest \
       restore-backup.sh
 # - TODO notify discord server starting

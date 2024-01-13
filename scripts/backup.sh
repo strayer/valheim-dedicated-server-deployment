@@ -6,7 +6,7 @@ SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
 export_server_ip
 
-ssh -i "/sshkey/sshkey.$GAME_NAME" -o "StrictHostKeyChecking no" "root@$SERVER_IP" "docker run --rm --read-only -v /gamedata:/gamedata --env-file /env-backup --tmpfs /tmp --add-host \$(cat /restic-host) -e BACKUP_TAG=after-session ghcr.io/strayer/game-server-deployment-discord-bot/backup:latest backup.sh"
+ssh -i "/sshkey/sshkey.$GAME_NAME" -o "StrictHostKeyChecking no" "root@$SERVER_IP" "docker run --rm --read-only -v /gamedata:/gamedata --env-file /env-backup --tmpfs /tmp -e BACKUP_TAG=after-session ghcr.io/strayer/game-server-deployment-discord-bot/backup:latest backup.sh"
 
 mkdir -p "$BACKUP_PATH/$GAME_NAME/current"
 

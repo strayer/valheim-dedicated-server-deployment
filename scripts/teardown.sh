@@ -24,7 +24,7 @@ echo "Backing up gamedata…"
 
 # try to unmount the cloudvolume and poweroff to avoid possible data loss when destroying the server
 case "$GAME_NAME" in
-  valheim|zomboid)
+  zomboid)
     ssh -i "/sshkey/sshkey.$GAME_NAME" -o "StrictHostKeyChecking no" "root@$SERVER_IP" "umount /mnt/cloudvolume && poweroff" || true
     ;;
 esac

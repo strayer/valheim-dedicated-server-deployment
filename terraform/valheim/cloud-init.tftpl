@@ -91,46 +91,32 @@ write_files:
       GAME_NAME=valheim
       GAMEDATA_PATH=/gamedata
     permissions: '0600'
-  - owner: root:root
-    path: /restic-host
-    content: ${ restic_hostname }:${ restic_ip }
-    permission: '0600'
-  - owner: root:root
-    path: /etc/wireguard/restic.conf
-    content: |
-      [Interface]
-      Address = ${ wireguard_valheim_address }
-      PrivateKey = ${ wireguard_valheim_private_key }
-
-      [Peer]
-      PublicKey = ${ wireguard_restic_peer_public_key }
-      PresharedKey = ${ wireguard_valheim_restic_peer_psk }
-      AllowedIPs = ${ wireguard_restic_peer_addresses }
-      Endpoint = ${ wireguard_restic_peer_endpoint }
-    permissions: '0600'
 
 packages:
   - docker-ce
   - docker-ce-cli
   - containerd.io
-  - wireguard
   - apparmor
   - apparmor-utils
 
 runcmd:
-  - systemctl enable wg-quick@restic
-  - systemctl start wg-quick@restic
+  - docker pull ghcr.io/strayer/game-server-deployment-discord-bot/valheim:latest
+  - docker pull ghcr.io/strayer/game-server-deployment-discord-bot/backup:latest
   - docker volume create steamcmd
-  - mkdir /mnt/cloudvolume
-  - mount ${ volume_device_path } /mnt/cloudvolume
-  - mkdir -p /mnt/cloudvolume/gamedata /mnt/cloudvolume/game
-  - ln -s /mnt/cloudvolume/gamedata /gamedata
-  - ln -s /mnt/cloudvolume/game /opt/valheim
-  - chown -R 1000 /gamedata /opt/valheim /mnt/cloudvolume/gamedata /mnt/cloudvolume/game
+  - docker volume create valheim
+  - mkdir /gamedata
+  - chown -R 1000 /gamedata
+  - |
+    docker run --rm --read-only \
+      -v /gamedata:/gamedata \
+      --env-file /env-backup \
+      --tmpfs /tmp \
+      ghcr.io/strayer/game-server-deployment-discord-bot/backup:latest \
+      restore-backup.sh
   - |
       docker run -d --read-only --network=host \
         -v steamcmd:/opt/steamcmd \
-        -v /opt/valheim:/opt/valheim \
+        -v valheim:/opt/valheim \
         -v /gamedata:/gamedata \
         --tmpfs /tmp:uid=1000 \
         -e VALHEIM_SERVER_NAME=${ valheim_server_name } \
