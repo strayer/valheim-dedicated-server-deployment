@@ -3,7 +3,7 @@ set -euo pipefail
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
-for game in valheim zomboid factorio; do
+for game in valheim factorio; do
   export TF_DATA_DIR="$TF_DATA_DIR_BASE"/"$game"
   mkdir -p "$TF_DATA_DIR"
 

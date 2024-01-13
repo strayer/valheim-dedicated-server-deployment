@@ -72,7 +72,6 @@ COPY scripts/ /app/scripts/
 COPY terraform/terraform-entrypoint.sh /app/terraform/
 
 COPY terraform/valheim/main.tf terraform/valheim/.terraform.lock.hcl terraform/valheim/cloud-init.tftpl /app/terraform/valheim/
-COPY terraform/zomboid/main.tf terraform/zomboid/.terraform.lock.hcl terraform/zomboid/cloud-init.tftpl /app/terraform/zomboid/
 COPY terraform/factorio/main.tf terraform/factorio/.terraform.lock.hcl terraform/factorio/cloud-init.tftpl /app/terraform/factorio/
 
 ENV TF_DATA_DIR_BASE=/terraform/init
