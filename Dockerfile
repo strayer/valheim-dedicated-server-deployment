@@ -78,4 +78,15 @@ ENV TF_DATA_DIR_BASE=/terraform/init
 
 ENTRYPOINT [ "/app/terraform/terraform-entrypoint.sh" ]
 
-CMD [ "rq", "worker", "--with-scheduler" ]
+CMD [ "rq", "worker", "-c", "sentry", "--with-scheduler" ]
+
+FROM python:3.11.1-slim AS runtime-server-launch-watcher
+
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+
+WORKDIR /app/discord_bot
+
+COPY --from=build /runtime /usr/local
+COPY --from=build /app/ /app/
+
+CMD [ "python", "server_launch_watcher.py" ]

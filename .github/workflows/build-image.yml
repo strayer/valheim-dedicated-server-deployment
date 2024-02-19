@@ -42,6 +42,14 @@ jobs:
           target: runtime-discord-bot
           tags: |
             ghcr.io/strayer/game-server-deployment-discord-bot/discord-bot:latest
+      - name: Build server-launch-watcher container image
+        uses: docker/build-push-action@v4
+        with:
+          push: true
+          provenance: false
+          target: runtime-server-launch-watcher
+          tags: |
+            ghcr.io/strayer/game-server-deployment-discord-bot/server-launch-watcher:latest
       - name: Build valheim container image
         uses: docker/build-push-action@v4
         with:

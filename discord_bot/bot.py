@@ -1,8 +1,13 @@
+import sentry
+
 import os
+from datetime import datetime
 
 import db
 import jobs
 import lightbulb
+import sentry_sdk
+from gpt.personas import Bella, HalvarTheSkald
 from loguru import logger
 
 GUILD_ID = int(os.environ["GUILD_ID"])
@@ -10,10 +15,25 @@ ALLOWED_CHANNEL_IDS = os.environ["CHANNEL_IDS"].split(",")
 
 COMMAND_PREFIX = "dev-" if os.getenv("ENV") == "dev" else ""
 
-BOT_IMAGE = "data:image/png;base64,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"
-BOT_NAME = "Game Server"
-
 bot = lightbulb.BotApp(token=os.environ["BOT_TOKEN"])
+
+
+@bot.listen(lightbulb.LightbulbStartedEvent)
+async def on_lightbulb_started_event(event: lightbulb.LightbulbStartedEvent):
+    logger.debug("Received LightbulbStartedEvent, updating bot username and avatar")
+
+    # this can fail due to rate limiting
+    try:
+        await event.app.rest.edit_my_user(username=Bella.name, avatar=Bella.avatar_url)
+    except Exception as e:
+        sentry_sdk.capture_exception(e)
+        pass
+
+
+def member_name(ctx: lightbulb.SlashContext):
+    if ctx.member:
+        return ctx.member.display_name
+    return ctx.author.username
 
 
 def is_authorized_channel(channel_id: str) -> bool:
@@ -45,16 +65,19 @@ def log_command(ctx: lightbulb.SlashContext) -> None:
 
 async def cooldown(ctx: lightbulb.SlashContext, seconds: int) -> bool:
     redis = db.get_redis()
-    if redis.get(ctx.command.name) is not None:
+    if redis.get("cooldown_" + ctx.command.name) is not None:
+        ttl = redis.ttl("cooldown_" + ctx.command.name)
+
         logger.warning(
-            "Received {command} command on cooldown in channel {channel} by user {username}",
+            "Received {command} command on cooldown in channel {channel} by user {username}, cooldown left is {ttl}",
             username=ctx.author.username,
             channel=ctx.channel_id,
             command=ctx.command.name,
+            ttl=ttl,
         )
-        ttl = redis.ttl(ctx.command.name)
+
         await ctx.respond(
-            f"ERROR: This command is on cooldown! Please retry later. ({ttl}s left)",
+            str.format(Bella.cooldown_message, name=member_name(ctx), seconds=ttl)
         )
         return False
 
@@ -64,7 +87,7 @@ async def cooldown(ctx: lightbulb.SlashContext, seconds: int) -> bool:
 
 def set_cooldown(ctx: lightbulb.SlashContext, seconds: int) -> None:
     redis = db.get_redis()
-    redis.set(ctx.command.name, value=1, ex=seconds)
+    redis.set("cooldown_" + ctx.command.name, value=1, ex=seconds)
 
 
 @bot.command
@@ -72,6 +95,7 @@ def set_cooldown(ctx: lightbulb.SlashContext, seconds: int) -> None:
     f"{COMMAND_PREFIX}start-valheim",
     "Starts the Valheim dedicated server.",
     guilds=[GUILD_ID],
+    auto_defer=True,
 )
 @lightbulb.implements(lightbulb.SlashCommand)
 async def start_valheim(ctx: lightbulb.SlashContext) -> None:
@@ -81,9 +105,26 @@ async def start_valheim(ctx: lightbulb.SlashContext) -> None:
         return
 
     log_command(ctx)
-    await ctx.respond("Server start trigger received, this may take a few minutes")
 
-    jobs.get_queue().enqueue(jobs.start_valheim_server)
+    response = await Bella.respond(
+        f"A player named {member_name(ctx)} requested to create and start the Valheim server.",
+        fallback=Bella.fallbacks.start_valheim,
+    )
+
+    await ctx.respond(response)
+
+    server_started_response = await HalvarTheSkald.respond(
+        f"A player called {member_name(ctx)} requested Bella to create the Valheim server. The server is now installed and will soon start. Let them know and mention that you will tell them when it is ready.",
+        fallback=HalvarTheSkald.fallbacks.server_stopping,
+    )
+    server_ready_response = await Bella.respond(
+        "The Valheim server finished starting and is ready to accept connections. Let the players know. You are ready for battle, adrenaline is pumping. Your response is loud and like a motivational speech before battle. You emphathize screams by uppercase.",
+        fallback=Bella.fallbacks.valheim_stopped_and_destroyed,
+    )
+
+    jobs.get_queue().enqueue(
+        jobs.start_valheim_server, server_started_response, server_ready_response
+    )
 
 
 @bot.command
@@ -91,6 +132,7 @@ async def start_valheim(ctx: lightbulb.SlashContext) -> None:
     f"{COMMAND_PREFIX}stop-valheim",
     "Stops the Valheim dedicated server.",
     guilds=[GUILD_ID],
+    auto_defer=True,
 )
 @lightbulb.implements(lightbulb.SlashCommand)
 async def stop_valheim(ctx: lightbulb.SlashContext) -> None:
@@ -100,9 +142,26 @@ async def stop_valheim(ctx: lightbulb.SlashContext) -> None:
         return
 
     log_command(ctx)
-    await ctx.respond("Server stop trigger received, this may take a few minutes")
 
-    jobs.get_queue().enqueue(jobs.stop_valheim_server)
+    response = await Bella.respond(
+        f"A player named {member_name(ctx)} requested to stop and destroy the Valheim server.",
+        fallback=Bella.fallbacks.stop_valheim,
+    )
+
+    await ctx.respond(response)
+
+    stop_started_response = await HalvarTheSkald.respond(
+        f"A player named {member_name(ctx)} requested Bella to stop and destroy the Valheim server. Let them know you are shutting it down.",
+        fallback=HalvarTheSkald.fallbacks.server_stopping,
+    )
+    stop_finished_response = await Bella.respond(
+        "The Valheim server has been backed up and destroyed. Wish the players good night looking forward to the next game night. Be clear that a backup has been made, don't find funny words for it.",
+        fallback=Bella.fallbacks.valheim_stopped_and_destroyed,
+    )
+
+    jobs.get_queue().enqueue(
+        jobs.stop_valheim_server, stop_started_response, stop_finished_response
+    )
 
 
 @bot.command
@@ -110,6 +169,7 @@ async def stop_valheim(ctx: lightbulb.SlashContext) -> None:
     f"{COMMAND_PREFIX}start-factorio",
     "Starts the Factorio dedicated server.",
     guilds=[GUILD_ID],
+    auto_defer=True,
 )
 @lightbulb.implements(lightbulb.SlashCommand)
 async def start_factorio(ctx: lightbulb.SlashContext) -> None:
@@ -119,7 +179,13 @@ async def start_factorio(ctx: lightbulb.SlashContext) -> None:
         return
 
     log_command(ctx)
-    await ctx.respond("Server start trigger received, this may take a few minutes")
+
+    response = await Bella.respond(
+        f"A player named {member_name(ctx)} requested to create and start the Factorio server.",
+        fallback=Bella.fallbacks.start_factorio,
+    )
+
+    await ctx.respond(response)
 
     jobs.get_queue().enqueue(jobs.start_factorio_server)
 
@@ -129,6 +195,7 @@ async def start_factorio(ctx: lightbulb.SlashContext) -> None:
     f"{COMMAND_PREFIX}stop-factorio",
     "Stops the Factorio dedicated server.",
     guilds=[GUILD_ID],
+    auto_defer=True,
 )
 @lightbulb.implements(lightbulb.SlashCommand)
 async def stop_factorio(ctx: lightbulb.SlashContext) -> None:
@@ -138,20 +205,86 @@ async def stop_factorio(ctx: lightbulb.SlashContext) -> None:
         return
 
     log_command(ctx)
-    await ctx.respond("Server stop trigger received, this may take a few minutes")
+
+    response = await Bella.respond(
+        f"A player named {member_name(ctx)} requested to stop and destroy the Factorio server.",
+        fallback=Bella.fallbacks.stop_factorio,
+    )
+
+    await ctx.respond(response)
 
     jobs.get_queue().enqueue(jobs.stop_factorio_server)
 
 
 @bot.command
-@lightbulb.command(f"{COMMAND_PREFIX}ping", "pong?", guilds=[GUILD_ID])
+@lightbulb.command(f"{COMMAND_PREFIX}ping", "pong?", guilds=[GUILD_ID], auto_defer=True)
 @lightbulb.implements(lightbulb.SlashCommand)
 async def ping(ctx: lightbulb.SlashContext) -> None:
     log_command(ctx)
 
-    await ctx.app.rest.edit_my_user(username=BOT_NAME, avatar=BOT_IMAGE)
+    response = await Bella.respond(
+        f"A player named {member_name(ctx)} sent you a ping.",
+        fallback=Bella.fallbacks.ping,
+    )
 
-    await ctx.respond(f"Pong! (channel_id: {ctx.channel_id})")
+    await ctx.respond(f"{response} (channel_id: {ctx.channel_id})")
+
+
+@bot.command
+@lightbulb.command(
+    f"{COMMAND_PREFIX}thank-you-bella", "☺️", guilds=[GUILD_ID], auto_defer=True
+)
+@lightbulb.implements(lightbulb.SlashCommand)
+async def thankyoubella(ctx: lightbulb.SlashContext) -> None:
+    if not await cooldown(ctx, 10):
+        return
+
+    log_command(ctx)
+
+    response = await Bella.respond(
+        f"A player named {member_name(ctx)} thanks you!", Bella.fallbacks.thank_you
+    )
+
+    await ctx.respond(response)
+
+
+@bot.command
+@lightbulb.command(
+    f"{COMMAND_PREFIX}hey-bella", "☺️", guilds=[GUILD_ID], auto_defer=True
+)
+@lightbulb.implements(lightbulb.SlashCommand)
+async def heybella(ctx: lightbulb.SlashContext) -> None:
+    if not await cooldown(ctx, 10):
+        return
+
+    log_command(ctx)
+
+    response = await Bella.respond(
+        f"A player named {member_name(ctx)} says hello to you!", Bella.fallbacks.hey
+    )
+
+    await ctx.respond(response)
+
+
+@bot.command
+@lightbulb.command(f"{COMMAND_PREFIX}tuesday", "🕹️", guilds=[GUILD_ID], auto_defer=True)
+@lightbulb.implements(lightbulb.SlashCommand)
+async def tuesday(ctx: lightbulb.SlashContext) -> None:
+    if not await cooldown(ctx, 10):
+        return
+
+    log_command(ctx)
+
+    if datetime.now().weekday() == 1:
+        response = await Bella.respond(
+            f"A player named {member_name(ctx)} wants you to announce that it is Tuesday, the usual game night. You didn't even think about today, so get extremely hyped that tonight is Tuesday and thus game night! After that, scream at everyone to wake the fuck up and beg them to tell you that they are actually available tonight."
+        )
+    else:
+        response = await Bella.respond(
+            f"A player named {member_name(ctx)} wants you to announce that it is Tuesday, the usual game night. It isn't tuesday though. Whisper to them and ask them if they are confused. After that get extremely hyped that maybe tonight is an extra game night! After that, scream at everyone to wake the fuck up and beg them to tell you that they are actually available tonight."
+        )
+
+    await ctx.respond(response)
 
 
 if __name__ == "__main__":
