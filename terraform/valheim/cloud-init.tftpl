@@ -91,6 +91,25 @@ write_files:
       GAME_NAME=valheim
       GAMEDATA_PATH=/gamedata
     permissions: '0600'
+  - owner: root:root
+    path: /usr/local/bin/discord-notify
+    permissions: '0755'
+    content: |
+      #!/usr/bin/env bash
+      set -euo pipefail
+
+      json_message=$(jq -n \
+        --arg content "$BOT_MESSAGE" \
+        --arg avatar_url "${ game_persona_bot_avatar_url }" \
+        --arg username "${ game_persona_bot_name }" \
+        '{$content, $avatar_url, $username}')
+
+      curl -i \
+        -H "Accept: application/json" \
+        -H "Content-Type: application/json" \
+        -X POST \
+        --data "$json_message" \
+        "${ valheim_discord_channel_webhook }"
 
 packages:
   - docker-ce
@@ -98,10 +117,13 @@ packages:
   - containerd.io
   - apparmor
   - apparmor-utils
+  - curl
+  - jq
 
 runcmd:
   - docker pull ghcr.io/strayer/game-server-deployment-discord-bot/valheim:latest
   - docker pull ghcr.io/strayer/game-server-deployment-discord-bot/backup:latest
+  - docker pull ghcr.io/strayer/game-server-deployment-discord-bot/server-launch-watcher:latest
   - docker volume create steamcmd
   - docker volume create valheim
   - mkdir /gamedata
@@ -113,6 +135,7 @@ runcmd:
       --tmpfs /tmp \
       ghcr.io/strayer/game-server-deployment-discord-bot/backup:latest \
       restore-backup.sh
+  - BOT_MESSAGE="${ bot_server_started_message }" discord-notify
   - |
       docker run -d --read-only --network=host \
         -v steamcmd:/opt/steamcmd \
@@ -125,5 +148,13 @@ runcmd:
         -e DISCORD_MAIN_CHANNEL_WEBHOOK=${ valheim_discord_channel_webhook } \
         --name valheim-server \
         ghcr.io/strayer/game-server-deployment-discord-bot/valheim:latest
+  - |
+      docker run -d --read-only \
+        -v /var/run/docker.sock:/var/run/docker.sock:ro \
+        -e GAME_NAME=valheim \
+        -e DISCORD_WEBHOOK=${ valheim_discord_channel_webhook } \
+        -e SERVER_READY_MESSAGE="${ bot_server_ready_message }" \
+        --name server-launch-watcher \
+        ghcr.io/strayer/game-server-deployment-discord-bot/server-launch-watcher:latest
 
 # vim: ft=yaml

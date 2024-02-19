@@ -4,6 +4,27 @@ set -euo pipefail
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 . "$SCRIPT_DIR/_base.sh"
 
+if [ "$GAME_NAME" = "valheim" ]; then
+  discord_channel_webhook="$TF_VAR_valheim_discord_channel_webhook"
+
+  json_message=$(jq -n \
+    --arg content "$BOT_MESSAGE_STARTED" \
+    --arg avatar_url "$BOT_GAME_PERSONA_AVATAR_URL" \
+    --arg username "$BOT_GAME_PERSONA_NAME" \
+    '{$content, $avatar_url, $username}')
+
+  curl -i \
+    -H "Accept: application/json" \
+    -H "Content-Type: application/json" \
+    -X POST \
+    --data "$json_message" \
+    "$discord_channel_webhook"
+fi
+
+if [ "$GAME_NAME" = "factorio" ]; then
+  discord_channel_webhook="$TF_VAR_factorio_discord_channel_webhook"
+fi
+
 export_terraform_data_dir
 export_server_ip
 
@@ -22,16 +43,23 @@ echo "Backing up gamedata…"
 echo "Destroying resources…"
 
 cd "$SCRIPT_DIR"/../terraform/"$GAME_NAME"
-terraform destroy -auto-approve -var="ssh_pubkey=foobar"
-
-message="$GAME_DISPLAY_NAME server destroyed 🧨💥"
-json_message=$(jq -n --arg content "$message" '{$content}')
+terraform destroy -auto-approve -var="ssh_pubkey=foobar" \
+  -var="game_persona_bot_name=$BOT_GAME_PERSONA_NAME" \
+  -var="game_persona_bot_avatar_url=$BOT_GAME_PERSONA_AVATAR_URL" \
+  -var="bot_server_started_message=foobar" \
+  -var="bot_server_ready_message=foobar"
 
 if [ "$GAME_NAME" = "valheim" ]; then
-  discord_channel_webhook="$TF_VAR_valheim_discord_channel_webhook"
+  json_message=$(jq -n \
+    --arg content "$BOT_MESSAGE_FINISHED" \
+    --arg avatar_url "$BOT_AVATAR_URL" \
+    --arg username "$BOT_NAME" \
+    '{$content, $avatar_url, $username}')
 fi
+
 if [ "$GAME_NAME" = "factorio" ]; then
-  discord_channel_webhook="$TF_VAR_factorio_discord_channel_webhook"
+  message="$GAME_DISPLAY_NAME server destroyed 🧨💥"
+  json_message=$(jq -n --arg content "$message" '{$content}')
 fi
 
 curl -i \
