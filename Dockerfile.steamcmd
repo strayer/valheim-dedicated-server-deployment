@@ -1,6 +1,6 @@
 FROM debian:11 AS steamcmd
 
-RUN apt-get update && apt-get full-upgrade -y && rm -rv /var/lib/apt/lists
+RUN apt-get update && apt-get full-upgrade -y && rm -rf /var/lib/apt/lists
 
 ENV LC_ALL en_US.UTF-8
 ENV LANG en_US.UTF-8
