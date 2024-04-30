@@ -23,7 +23,7 @@ async def on_lightbulb_started_event(event: lightbulb.LightbulbStartedEvent):
 
     # this can fail due to rate limiting
     try:
-        await event.app.rest.edit_my_user(username=Bella.name, avatar=Bella.avatar_url)
+        await event.app.rest.edit_my_user(username=GrumpyGreg.name, avatar=GrumpyGreg.avatar_url)
     except Exception as e:
         sentry_sdk.capture_exception(e)
         pass
