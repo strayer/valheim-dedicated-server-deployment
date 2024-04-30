@@ -18,7 +18,7 @@ backoff = "^2.2.1"
 requests = "^2.31.0"
 
 [tool.poetry.dev-dependencies]
-black = "^23.1a1"
+black = "^24.3"
 pylint = "^2.12.2"
 bandit = "^1.7.1"
 
