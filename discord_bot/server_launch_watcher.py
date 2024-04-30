@@ -1,3 +1,5 @@
+from dataclasses import dataclass
+import socket
 import os
 import re
 import sys
@@ -39,14 +41,54 @@ else:
 compiled_regex = re.compile(REGEX_PATTERN)
 
 
+@dataclass
+class ServerAddresses:
+    ipv4: str
+    ipv6: str | None
+    domain: str | None
+
+    def __str__(self) -> str:
+        ip_part = self.ipv4 if self.ipv6 is None else f"{self.ipv4}, {self.ipv6}"
+
+        if self.domain is None:
+            return ip_part
+        else:
+            return f"{self.domain} ({ip_part})"
+
+
+def reverse_dns(ip: str) -> str | None:
+    try:
+        resolved_hostname, _, _ = socket.gethostbyaddr(ip)
+        return resolved_hostname
+    except socket.herror:
+        # Handle exception which may be thrown if the IP does not have a reverse DNS record
+        return None
+
+
 @backoff.on_exception(backoff.expo, NotFound, max_time=60)
 def get_container() -> Container:
-    return client.containers.get(CONTAINER_NAME)
+    return client.containers.get(CONTAINER_NAME)  # type:ignore
 
 
-def notify_server_ready():
+def get_addresses() -> ServerAddresses:
+    r_ipv4 = requests.get("https://ipv4.icanhazip.com/")
+    r_ipv6 = requests.get("https://ipv6.icanhazip.com/")
+
+    r_ipv4.raise_for_status()
+
+    ipv4 = r_ipv4.text.strip()
+    ipv6 = r_ipv6.text.strip() if r_ipv6.ok else None
+
+    return ServerAddresses(
+        ipv4=ipv4,
+        ipv6=ipv6,
+        domain=reverse_dns(ipv4),
+    )
+
+
+def notify_server_ready(server_addresses: ServerAddresses):
     data = {
-        "content": SERVER_READY_MESSAGE,
+        "content": f"{SERVER_READY_MESSAGE} ({server_addresses})",
         "avatar_url": HalvarTheSkald.avatar_url,
         "username": HalvarTheSkald.name,
     }
@@ -57,6 +99,8 @@ def notify_server_ready():
 # Establish a connection to the Docker server using the default socket
 client = docker.from_env()
 
+server_addresses = get_addresses()
+
 try:
     container = get_container()
 
@@ -66,7 +110,7 @@ try:
 
         if compiled_regex.search(log_line):
             logger.info("Matched log line: {log_line}", log_line=log_line)
-            notify_server_ready()
+            notify_server_ready(server_addresses)
             break
         else:
             logger.debug("Unmatched log line: {log_line}", log_line=log_line)
