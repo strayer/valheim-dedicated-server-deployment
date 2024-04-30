@@ -1,13 +1,12 @@
-import sentry
-
 import os
 from datetime import datetime
 
 import db
 import jobs
 import lightbulb
+import sentry
 import sentry_sdk
-from gpt.personas import Bella, HalvarTheSkald
+from gpt.personas import GrumpyGreg, HalvarTheSkald
 from loguru import logger
 
 GUILD_ID = int(os.environ["GUILD_ID"])
@@ -77,7 +76,7 @@ async def cooldown(ctx: lightbulb.SlashContext, seconds: int) -> bool:
         )
 
         await ctx.respond(
-            str.format(Bella.cooldown_message, name=member_name(ctx), seconds=ttl)
+            str.format(GrumpyGreg.cooldown_message, name=member_name(ctx), seconds=ttl)
         )
         return False
 
@@ -106,22 +105,15 @@ async def start_valheim(ctx: lightbulb.SlashContext) -> None:
 
     log_command(ctx)
 
-    response = await Bella.respond(
-        f"A player named {member_name(ctx)} requested to create and start the Valheim server.",
-        fallback=Bella.fallbacks.start_valheim,
-    )
+    response = await GrumpyGreg.valheim_start_request(member_name(ctx))
 
     await ctx.respond(response)
 
-    server_started_response = await HalvarTheSkald.respond(
-        f"A player called {member_name(ctx)} requested Bella to create the Valheim server. The server is now installed and will soon start. Let them know and mention that you will tell them when it is ready.",
+    server_started_response = await HalvarTheSkald._respond(
+        f"A player called {member_name(ctx)} requested GrumpyGreg to create the Valheim server. The server is now installed and will soon start. Let them know and mention that you will tell them when it is ready.",
         fallback=HalvarTheSkald.fallbacks.server_stopping,
     )
-    server_ready_response = await Bella.respond(
-        "The Valheim server finished starting and is ready to accept connections. Let the players know. You are ready for battle, adrenaline is pumping. Your response is loud and like a motivational speech before battle. You emphathize screams by uppercase.",
-        fallback=Bella.fallbacks.valheim_stopped_and_destroyed,
-    )
-
+    server_ready_response = await GrumpyGreg.valheim_start_finished()
     jobs.get_queue().enqueue(
         jobs.start_valheim_server, server_started_response, server_ready_response
     )
@@ -143,22 +135,15 @@ async def stop_valheim(ctx: lightbulb.SlashContext) -> None:
 
     log_command(ctx)
 
-    response = await Bella.respond(
-        f"A player named {member_name(ctx)} requested to stop and destroy the Valheim server.",
-        fallback=Bella.fallbacks.stop_valheim,
-    )
+    response = await GrumpyGreg.valheim_stop_request(member_name(ctx))
 
     await ctx.respond(response)
 
-    stop_started_response = await HalvarTheSkald.respond(
-        f"A player named {member_name(ctx)} requested Bella to stop and destroy the Valheim server. Let them know you are shutting it down.",
+    stop_started_response = await HalvarTheSkald._respond(
+        f"A player named {member_name(ctx)} requested GrumpyGreg to stop and destroy the Valheim server. Let them know you are shutting it down.",
         fallback=HalvarTheSkald.fallbacks.server_stopping,
     )
-    stop_finished_response = await Bella.respond(
-        "The Valheim server has been backed up and destroyed. Wish the players good night looking forward to the next game night. Be clear that a backup has been made, don't find funny words for it.",
-        fallback=Bella.fallbacks.valheim_stopped_and_destroyed,
-    )
-
+    stop_finished_response = await GrumpyGreg.valheim_stop_finished()
     jobs.get_queue().enqueue(
         jobs.stop_valheim_server, stop_started_response, stop_finished_response
     )
@@ -180,11 +165,7 @@ async def start_factorio(ctx: lightbulb.SlashContext) -> None:
 
     log_command(ctx)
 
-    response = await Bella.respond(
-        f"A player named {member_name(ctx)} requested to create and start the Factorio server.",
-        fallback=Bella.fallbacks.start_factorio,
-    )
-
+    response = await GrumpyGreg.factorio_start_request(member_name(ctx))
     await ctx.respond(response)
 
     jobs.get_queue().enqueue(jobs.start_factorio_server)
@@ -206,10 +187,7 @@ async def stop_factorio(ctx: lightbulb.SlashContext) -> None:
 
     log_command(ctx)
 
-    response = await Bella.respond(
-        f"A player named {member_name(ctx)} requested to stop and destroy the Factorio server.",
-        fallback=Bella.fallbacks.stop_factorio,
-    )
+    response = await GrumpyGreg.factorio_stop_request(member_name(ctx))
 
     await ctx.respond(response)
 
@@ -222,10 +200,7 @@ async def stop_factorio(ctx: lightbulb.SlashContext) -> None:
 async def ping(ctx: lightbulb.SlashContext) -> None:
     log_command(ctx)
 
-    response = await Bella.respond(
-        f"A player named {member_name(ctx)} sent you a ping.",
-        fallback=Bella.fallbacks.ping,
-    )
+    response = await GrumpyGreg.ping(member_name(ctx))
 
     await ctx.respond(f"{response} (channel_id: {ctx.channel_id})")
 
@@ -241,9 +216,7 @@ async def thankyoubella(ctx: lightbulb.SlashContext) -> None:
 
     log_command(ctx)
 
-    response = await Bella.respond(
-        f"A player named {member_name(ctx)} thanks you!", Bella.fallbacks.thank_you
-    )
+    response = await GrumpyGreg.thank_you(member_name(ctx))
 
     await ctx.respond(response)
 
@@ -259,9 +232,7 @@ async def heybella(ctx: lightbulb.SlashContext) -> None:
 
     log_command(ctx)
 
-    response = await Bella.respond(
-        f"A player named {member_name(ctx)} says hello to you!", Bella.fallbacks.hey
-    )
+    response = await GrumpyGreg.hey(member_name(ctx))
 
     await ctx.respond(response)
 
@@ -276,13 +247,9 @@ async def tuesday(ctx: lightbulb.SlashContext) -> None:
     log_command(ctx)
 
     if datetime.now().weekday() == 1:
-        response = await Bella.respond(
-            f"A player named {member_name(ctx)} wants you to announce that it is Tuesday, the usual game night. You didn't even think about today, so get extremely hyped that tonight is Tuesday and thus game night! After that, scream at everyone to wake the fuck up and beg them to tell you that they are actually available tonight."
-        )
+        response = await GrumpyGreg.tuesday(member_name(ctx))
     else:
-        response = await Bella.respond(
-            f"A player named {member_name(ctx)} wants you to announce that it is Tuesday, the usual game night. It isn't tuesday though. Whisper to them and ask them if they are confused. After that get extremely hyped that maybe tonight is an extra game night! After that, scream at everyone to wake the fuck up and beg them to tell you that they are actually available tonight."
-        )
+        response = await GrumpyGreg.not_tuesday(member_name(ctx))
 
     await ctx.respond(response)
 
