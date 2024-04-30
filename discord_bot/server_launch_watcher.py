@@ -1,18 +1,17 @@
-from dataclasses import dataclass
-import socket
 import os
 import re
+import socket
 import sys
+from dataclasses import dataclass
 
 import backoff
+import requests
+from gpt.personas import GrumpyGreg
 from loguru import logger
 
 import docker
 from docker.errors import NotFound
 from docker.models.containers import Container
-
-from gpt.personas import HalvarTheSkald
-import requests
 
 # Specify the environment variables for the container name and regex pattern
 GAME_NAME = os.environ.get("GAME_NAME")
@@ -88,9 +87,9 @@ def get_addresses() -> ServerAddresses:
 
 def notify_server_ready(server_addresses: ServerAddresses):
     data = {
-        "content": f"{SERVER_READY_MESSAGE} ({server_addresses})",
-        "avatar_url": HalvarTheSkald.avatar_url,
-        "username": HalvarTheSkald.name,
+        "content": f"{SERVER_READY_MESSAGE} [{server_addresses}]",
+        "avatar_url": GrumpyGreg.avatar_url,
+        "username": GrumpyGreg.name,
     }
     result = requests.post(DISCORD_WEBHOOK, json=data)
     result.raise_for_status()
