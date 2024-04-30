@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-/opt/bin/notify-discord-server-starting.sh || true
-
 export LD_LIBRARY_PATH=/opt/valheim/linux64:${LD_LIBRARY_PATH:-}
 
 cd /opt/valheim

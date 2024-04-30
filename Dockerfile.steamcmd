@@ -30,7 +30,6 @@ RUN useradd -u 1000 -m steam && \
 COPY docker/install-steamcmd.sh \
   docker/update-steamcmd.sh \
   docker/install-or-update-game.sh \
-  docker/notify-discord-server-starting.sh \
   docker/entrypoint.sh \
   /opt/bin/
 
