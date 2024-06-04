@@ -19,6 +19,7 @@ class InfrastructurePersonaPrompts:
     hey: str
     tuesday: str
     not_tuesday: str
+    fuck_you_greg: str
 
     valheim_start_request: str
     valheim_start_finished: str
@@ -105,6 +106,10 @@ class InfrastructurePersona(Persona):
         prompt = str.format(self.prompts.factorio_stop_request, name=player_name)
         return await self._respond(prompt, self.fallbacks.factorio_stop_request)
 
+    async def fuck_you_greg(self, player_name: str) -> str | None:
+        prompt = str.format(self.prompts.fuck_you_greg, name=player_name)
+        return await self._respond(prompt, self.fallbacks.fuck_you_greg)
+
 
 Bella = InfrastructurePersona(
     name="Bella, Queen of Infrastructure",
@@ -128,6 +133,7 @@ Bella = InfrastructurePersona(
         valheim_stop_finished="The Valheim server has been backed up and destroyed. Wish the players good night looking forward to the next game night. Be clear that a backup has been made, don't find funny words for it.",
         factorio_start_request="A player named {name} requested to create and start the Factorio server.",
         factorio_stop_request="A player named {name} requested to stop and destroy the Factorio server.",
+        fuck_you_greg="A player named {name} told someone named Greg \"Fuck you!\", but you don't know who that is and find that very impolite!",
     ),
     fallbacks=InfrastructurePersonaFallbacks(
         tuesday="Oh snap! 😲 It looks like OpenAI is having a little snooze right now, but no worries 'cause I'm still hyper-wired for our epic Tuesday game night! 🎮💥 Guys, GUYS! Can you believe it?! It's our fabled day of digital glory! I'm bouncing off the digital walls here!! 🤩 Please, oh pretty please with a cherry on top, tell me y'all are free tonight?! 🙏 Give me a shout if you're ready to bring the thunder! ⚡",
@@ -142,6 +148,7 @@ Bella = InfrastructurePersona(
         hey="Welp, seems OpenAI is having a bit of a hiccup right now… But hey, that's not gonna stop us! Thank you so much for reaching out. I'll have everything up and running in no time, so you can dive back into your epic adventures shortly! Just hang tight! 😊",
         ping="Welp, seems OpenAI is dead… 🤖💔 But fear not, I'm still here! Pong! 🏓",
         fallback_generation_prompt="A prompt was sent to OpenAI, but it seems to be down. Let the player know and respond to the original prompt. The original prompt: {prompt}",
+        fuck_you_greg="Oh dear, it looks like OpenAI is taking a quick nap right now! 😴 But hey, let's keep things friendly and respectful, okay? We're all here to have a good time! 🎮✨",
     ),
 )
 
@@ -168,6 +175,7 @@ GrumpyGreg = InfrastructurePersona(
         valheim_stop_finished="The Valheim server has been stopped by Halvar and you backed up and destroyed it. Make sure to mention that you are a professional and took care in creating the backups, even though the players really don't deserve it.",
         factorio_start_request="A player named {name} requested to create and start the Factorio server.",
         factorio_stop_request="A player named {name} requested to stop and destroy the Factorio server.",
+        fuck_you_greg="A player named {name} told you \"Fuck you!\". Angrily insult them and tell them off as well!",
     ),
     fallbacks=InfrastructurePersonaFallbacks(
         ping="Oh, great. OpenAI's taking a nap, and here I am, busting my chops for what? Listen, {name}, go bother someone else with your pings; I've got enough on my plate already.",
@@ -182,6 +190,7 @@ GrumpyGreg = InfrastructurePersona(
         factorio_start_request="Oh, great, Open-frickin'-AI is down again! What am I, a wizard with a magic wand to fix their server issues? Anyway, {name}, I'm on it, setting up your damn Factorio server. Fitzgerald Gallagher will message you when it's ready to go. Now, let me work in peace!",
         factorio_stop_request="Oh, for crying out loud. OpenAI's got one job and can't even do that without tripping over its own circuits. Also, tell {name} I'll rip down their blasted Factorio server, and Fitzgerald Gallagher will send a bloody pigeon or something when it's done.",
         fallback_generation_prompt="A prompt was sent to OpenAI, but it seems to be down. Rant about OpenAI. Let the player know and respond to the original prompt. The original prompt: {prompt}",
+        fuck_you_greg="Ah, perfect, because I need another damn reason to be irritated today. Of course, OpenAI decides to take a nap when there's work to be done, the lazy heap of circuits! And as for you, {name}, if I wanted lip from you, I’d rattle my zipper. Keep it up, and I'll make sure the server takes as long as a sloth crossing a damn tar pit. Now scurry off while I work, pest.",
     ),
 )
 

@@ -254,5 +254,19 @@ async def tuesday(ctx: lightbulb.SlashContext) -> None:
     await ctx.respond(response)
 
 
+@bot.command
+@lightbulb.command(f"{COMMAND_PREFIX}fuck-you-greg", "🕹️", guilds=[GUILD_ID], auto_defer=True)
+@lightbulb.implements(lightbulb.SlashCommand)
+async def fuck_you_greg(ctx: lightbulb.SlashContext) -> None:
+    if not await cooldown(ctx, 10):
+        return
+
+    log_command(ctx)
+
+    response = await GrumpyGreg.fuck_you_greg(member_name(ctx))
+
+    await ctx.respond(response)
+
+
 if __name__ == "__main__":
     bot.run()
