@@ -6,7 +6,7 @@ import jobs
 import lightbulb
 import sentry
 import sentry_sdk
-from gpt.personas import GrumpyGreg, HalvarTheSkald
+from gpt.personas import Meowstro, HalvarTheSkald
 from loguru import logger
 
 GUILD_ID = int(os.environ["GUILD_ID"])
@@ -23,7 +23,9 @@ async def on_lightbulb_started_event(event: lightbulb.LightbulbStartedEvent):
 
     # this can fail due to rate limiting
     try:
-        await event.app.rest.edit_my_user(username=GrumpyGreg.name, avatar=GrumpyGreg.avatar_url)
+        await event.app.rest.edit_my_user(
+            username=Meowstro.name, avatar=Meowstro.avatar_url
+        )
     except Exception as e:
         sentry_sdk.capture_exception(e)
         pass
@@ -76,7 +78,7 @@ async def cooldown(ctx: lightbulb.SlashContext, seconds: int) -> bool:
         )
 
         await ctx.respond(
-            str.format(GrumpyGreg.cooldown_message, name=member_name(ctx), seconds=ttl)
+            str.format(Meowstro.cooldown_message, name=member_name(ctx), seconds=ttl)
         )
         return False
 
@@ -105,15 +107,15 @@ async def start_valheim(ctx: lightbulb.SlashContext) -> None:
 
     log_command(ctx)
 
-    response = await GrumpyGreg.valheim_start_request(member_name(ctx))
+    response = await Meowstro.valheim_start_request(member_name(ctx))
 
     await ctx.respond(response)
 
     server_started_response = await HalvarTheSkald._respond(
-        f"A player called {member_name(ctx)} requested GrumpyGreg to create the Valheim server. The server is now installed and will soon start. Let them know and mention that you will tell them when it is ready.",
+        f"A player called {member_name(ctx)} requested Meowstro to create the Valheim server. The server is now installed and will soon start. Let them know and mention that you will tell them when it is ready.",
         fallback=HalvarTheSkald.fallbacks.server_stopping,
     )
-    server_ready_response = await GrumpyGreg.valheim_start_finished()
+    server_ready_response = await Meowstro.valheim_start_finished()
     jobs.get_queue().enqueue(
         jobs.start_valheim_server, server_started_response, server_ready_response
     )
@@ -135,15 +137,15 @@ async def stop_valheim(ctx: lightbulb.SlashContext) -> None:
 
     log_command(ctx)
 
-    response = await GrumpyGreg.valheim_stop_request(member_name(ctx))
+    response = await Meowstro.valheim_stop_request(member_name(ctx))
 
     await ctx.respond(response)
 
     stop_started_response = await HalvarTheSkald._respond(
-        f"A player named {member_name(ctx)} requested GrumpyGreg to stop and destroy the Valheim server. Let them know you are shutting it down.",
+        f"A player named {member_name(ctx)} requested Meowstro to stop and destroy the Valheim server. Let them know you are shutting it down.",
         fallback=HalvarTheSkald.fallbacks.server_stopping,
     )
-    stop_finished_response = await GrumpyGreg.valheim_stop_finished()
+    stop_finished_response = await Meowstro.valheim_stop_finished()
     jobs.get_queue().enqueue(
         jobs.stop_valheim_server, stop_started_response, stop_finished_response
     )
@@ -165,7 +167,7 @@ async def start_factorio(ctx: lightbulb.SlashContext) -> None:
 
     log_command(ctx)
 
-    response = await GrumpyGreg.factorio_start_request(member_name(ctx))
+    response = await Meowstro.factorio_start_request(member_name(ctx))
     await ctx.respond(response)
 
     jobs.get_queue().enqueue(jobs.start_factorio_server)
@@ -187,7 +189,7 @@ async def stop_factorio(ctx: lightbulb.SlashContext) -> None:
 
     log_command(ctx)
 
-    response = await GrumpyGreg.factorio_stop_request(member_name(ctx))
+    response = await Meowstro.factorio_stop_request(member_name(ctx))
 
     await ctx.respond(response)
 
@@ -200,7 +202,7 @@ async def stop_factorio(ctx: lightbulb.SlashContext) -> None:
 async def ping(ctx: lightbulb.SlashContext) -> None:
     log_command(ctx)
 
-    response = await GrumpyGreg.ping(member_name(ctx))
+    response = await Meowstro.ping(member_name(ctx))
 
     await ctx.respond(f"{response} (channel_id: {ctx.channel_id})")
 
@@ -216,7 +218,7 @@ async def thankyoubella(ctx: lightbulb.SlashContext) -> None:
 
     log_command(ctx)
 
-    response = await GrumpyGreg.thank_you(member_name(ctx))
+    response = await Meowstro.thank_you(member_name(ctx))
 
     await ctx.respond(response)
 
@@ -232,7 +234,7 @@ async def heybella(ctx: lightbulb.SlashContext) -> None:
 
     log_command(ctx)
 
-    response = await GrumpyGreg.hey(member_name(ctx))
+    response = await Meowstro.hey(member_name(ctx))
 
     await ctx.respond(response)
 
@@ -247,15 +249,17 @@ async def tuesday(ctx: lightbulb.SlashContext) -> None:
     log_command(ctx)
 
     if datetime.now().weekday() == 1:
-        response = await GrumpyGreg.tuesday(member_name(ctx))
+        response = await Meowstro.tuesday(member_name(ctx))
     else:
-        response = await GrumpyGreg.not_tuesday(member_name(ctx))
+        response = await Meowstro.not_tuesday(member_name(ctx))
 
     await ctx.respond(response)
 
 
 @bot.command
-@lightbulb.command(f"{COMMAND_PREFIX}fuck-you-greg", "🕹️", guilds=[GUILD_ID], auto_defer=True)
+@lightbulb.command(
+    f"{COMMAND_PREFIX}fuck-you-greg", "🕹️", guilds=[GUILD_ID], auto_defer=True
+)
 @lightbulb.implements(lightbulb.SlashCommand)
 async def fuck_you_greg(ctx: lightbulb.SlashContext) -> None:
     if not await cooldown(ctx, 10):
@@ -263,7 +267,7 @@ async def fuck_you_greg(ctx: lightbulb.SlashContext) -> None:
 
     log_command(ctx)
 
-    response = await GrumpyGreg.fuck_you_greg(member_name(ctx))
+    response = await Meowstro.fuck_you_greg(member_name(ctx))
 
     await ctx.respond(response)
 

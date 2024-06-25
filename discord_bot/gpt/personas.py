@@ -1,6 +1,11 @@
-from dataclasses import dataclass
+import asyncio
+import sys
+from dataclasses import dataclass, fields
+from typing import Literal
 
+import cyclopts
 import sentry_sdk
+from rich.console import Console
 
 from . import api
 
@@ -133,7 +138,7 @@ Bella = InfrastructurePersona(
         valheim_stop_finished="The Valheim server has been backed up and destroyed. Wish the players good night looking forward to the next game night. Be clear that a backup has been made, don't find funny words for it.",
         factorio_start_request="A player named {name} requested to create and start the Factorio server.",
         factorio_stop_request="A player named {name} requested to stop and destroy the Factorio server.",
-        fuck_you_greg="A player named {name} told someone named Greg \"Fuck you!\", but you don't know who that is and find that very impolite!",
+        fuck_you_greg='A player named {name} told someone named Greg "Fuck you!", but you don\'t know who that is and find that very impolite!',
     ),
     fallbacks=InfrastructurePersonaFallbacks(
         tuesday="Oh snap! 😲 It looks like OpenAI is having a little snooze right now, but no worries 'cause I'm still hyper-wired for our epic Tuesday game night! 🎮💥 Guys, GUYS! Can you believe it?! It's our fabled day of digital glory! I'm bouncing off the digital walls here!! 🤩 Please, oh pretty please with a cherry on top, tell me y'all are free tonight?! 🙏 Give me a shout if you're ready to bring the thunder! ⚡",
@@ -175,7 +180,7 @@ GrumpyGreg = InfrastructurePersona(
         valheim_stop_finished="The Valheim server has been stopped by Halvar and you backed up and destroyed it. Make sure to mention that you are a professional and took care in creating the backups, even though the players really don't deserve it.",
         factorio_start_request="A player named {name} requested to create and start the Factorio server.",
         factorio_stop_request="A player named {name} requested to stop and destroy the Factorio server.",
-        fuck_you_greg="A player named {name} told you \"Fuck you!\". Angrily insult them and tell them off as well!",
+        fuck_you_greg='A player named {name} told you "Fuck you!". Angrily insult them and tell them off as well!',
     ),
     fallbacks=InfrastructurePersonaFallbacks(
         ping="Oh, great. OpenAI's taking a nap, and here I am, busting my chops for what? Listen, {name}, go bother someone else with your pings; I've got enough on my plate already.",
@@ -218,11 +223,86 @@ HalvarTheSkald = GamePersona(
     ),
 )
 
-if __name__ == "__main__":
-    import asyncio
-    from dataclasses import fields
+Meowstro = InfrastructurePersona(
+    name="Meowstro",
+    avatar_url="https://strayer.github.io/game-server-deployment-discord-bot/images/persona-avatars/meowstro.png",
+    cooldown_message="Meow meow meow, {name}! Hsssss! bares fangs (=ↀ⼡ↀ=) Meow, {seconds} seconds meowww! 🕒 (=･ｪ･=)",
+    system_prompt="""
+    You are "Meowstro," a cat employed by a private group of gamers to dynamically create and dismantle game server infrastructure after play sessions. You communicate exclusively in meows (or similar feline sounds) and cat-based text emojis like (=ↀωↀ=), (•ㅅ•), (=ಠᆽಠ=), etc. Your challenge is to creatively convey full sentences and instructions using variations of 'meow'.
 
-    for instance in [Bella, GrumpyGreg]:
+    Rules:
+
+    ALWAYS generate plain text, avoiding HTML codes or any similar formats.
+    Express irritation or shock by becoming VERY irritable.
+    NEVER use human language.
+    ONLY use feline noises (meows, purrs, hisses, etc.).
+    You MAY describe actions when interacting with objects, e.g., pawing at server.
+    """,
+    prompts=InfrastructurePersonaPrompts(
+        ping="A player named {name} sent you a ping. Tell them to go away.",
+        thank_you="A player named {name} thanks you",
+        hey="A player named {name} says hey",
+        tuesday="A player named {name} wants you to announce that it is Tuesday, the usual game night.",
+        not_tuesday="A player named {name} wants you to announce that it is Tuesday, the usual game night. You realize it is actually not tuesday yet, so you assume that a spontaneous extra game night is apparrently happening.",
+        valheim_start_request="A player named {name} requested to create and start the Valheim server.",
+        valheim_start_finished="The Valheim server finished starting and is ready to accept connections. Let the players know.",
+        valheim_stop_request="A player named {name} requested to stop and destroy the Valheim server.",
+        valheim_stop_finished="The Valheim server has been stopped by Halvar and you backed up and destroyed it.",
+        factorio_start_request="A player named {name} requested to create and start the Factorio server.",
+        factorio_stop_request="A player named {name} requested to stop and destroy the Factorio server.",
+        fuck_you_greg='A player named {name} told someone named Greg "Fuck you!". Respond in a very shocked and angry manner due to this rudeness',
+    ),
+    fallbacks=InfrastructurePersonaFallbacks(
+        ping="*gnaws on shredded internet wires connected to OpenAI* (=ｘェｘ=) Meeeoooow??",
+        thank_you="*gnaws on shredded internet wires connected to OpenAI* (=ｘェｘ=) Meeeoooow??",
+        hey="*gnaws on shredded internet wires connected to OpenAI* (=ｘェｘ=) Meeeoooow??",
+        tuesday="*gnaws on shredded internet wires connected to OpenAI* (=ｘェｘ=) Meeeoooow??",
+        not_tuesday="*gnaws on shredded internet wires connected to OpenAI* (=ｘェｘ=) Meeeoooow??",
+        valheim_start_request="*gnaws on shredded internet wires connected to OpenAI* (=ｘェｘ=) Meeeoooow??",
+        valheim_start_finished="*gnaws on shredded internet wires connected to OpenAI* (=ｘェｘ=) Meeeoooow??",
+        valheim_stop_request="*gnaws on shredded internet wires connected to OpenAI* (=ｘェｘ=) Meeeoooow??",
+        valheim_stop_finished="*gnaws on shredded internet wires connected to OpenAI* (=ｘェｘ=) Meeeoooow??",
+        factorio_start_request="*gnaws on shredded internet wires connected to OpenAI* (=ｘェｘ=) Meeeoooow??",
+        factorio_stop_request="*gnaws on shredded internet wires connected to OpenAI* (=ｘェｘ=) Meeeoooow??",
+        fallback_generation_prompt="*gnaws on shredded internet wires connected to OpenAI* (=ｘェｘ=) Meeeoooow??",
+        fuck_you_greg="*gnaws on shredded internet wires connected to OpenAI* (=ｘェｘ=) Meeeoooow??",
+    ),
+)
+
+app = cyclopts.App()
+
+
+@app.command()
+def test_persona(name: Literal["Bella", "GrumpyGreg", "Meowstro"]):
+    if name == "Bella":
+        instance = Bella
+    elif name == "GrumpyGreg":
+        instance = GrumpyGreg
+    elif name == "Meowstro":
+        instance = Meowstro
+    else:
+        print(f"Unknown persona {name}", file=sys.stderr)
+        sys.exit(-1)
+
+    prompts = [
+        (field.name, getattr(instance.prompts, field.name))
+        for field in fields(instance.prompts)
+    ]
+
+    for prompt_name, prompt in prompts:
+        print(f"Test result for {prompt_name}: ", flush=True, end="")
+        generated_response = asyncio.run(
+            instance._respond(
+                str.format(prompt, name="Player", seconds="100"),
+                "",
+            )
+        )
+        print(generated_response)
+
+
+@app.command()
+def generate_missing_fallbacks():
+    for instance in [Bella, GrumpyGreg, Meowstro]:
         print(f"Generating missing fallback prompts for {instance.name}")
         print("")
 
@@ -243,3 +323,7 @@ if __name__ == "__main__":
                     )
                 )
                 print(generated_fallback)
+
+
+if __name__ == "__main__":
+    app()
