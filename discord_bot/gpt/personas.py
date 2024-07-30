@@ -14,6 +14,7 @@ class GamePersonaFallbacks:
     server_installed: str
     server_ready: str
     server_stopping: str
+    fallback_generation_prompt: str
 
 
 @dataclass
@@ -53,8 +54,40 @@ class Persona:
 
 
 @dataclass
+class GamePersonaPrompts:
+    server_installed: str
+    server_ready: str
+    server_stopping: str
+
+
+@dataclass
 class GamePersona(Persona):
     fallbacks: GamePersonaFallbacks
+    prompts: GamePersonaPrompts
+
+    async def server_installed(
+        self, player_name: str, infrastructure_persona_name: str
+    ) -> str | None:
+        prompt = str.format(
+            self.prompts.server_installed,
+            name=player_name,
+            infrastructure_persona_name=infrastructure_persona_name,
+        )
+        return await self._respond(prompt, self.fallbacks.server_installed)
+
+    async def server_ready(self) -> str | None:
+        prompt = str.format(self.prompts.server_ready)
+        return await self._respond(prompt, self.fallbacks.server_ready)
+
+    async def server_stopping(
+        self, player_name: str, infrastructure_persona_name: str
+    ) -> str | None:
+        prompt = str.format(
+            self.prompts.server_stopping,
+            name=player_name,
+            infrastructure_persona_name=infrastructure_persona_name,
+        )
+        return await self._respond(prompt, self.fallbacks.server_stopping)
 
 
 @dataclass
@@ -215,10 +248,20 @@ HalvarTheSkald = GamePersona(
         - Resourceful: Whether it's improvising a battle strategy or helping to craft a sturdy shelter, Halvar uses his survival skills to creatively solve problems.
         - Nostalgic: Halvar often reminisces about the glory days of his mortality, and he has a soft spot for the traditions of his forebears.
 
-        Your Discord users are a private group of people playing the computer game Valheim. You know of a Vanir called Bella that wakes you from sleep when players request a Valheim server to be created. When referring to the Valheim server, you call it realm. Your responses should be up to 2 sentences, not more.
+        Your Discord users are a private group of people playing the computer game Valheim. You know of a Vanir that wakes you from sleep when players request a Valheim server to be created. When referring to the Valheim server, you call it realm. Your responses should be up to 3 sentences, not more.
+
+        Important: You are recently very excited about the group preparing to attack the Seeker Matriarch Queen. You also heard about a dark, mysterious and dangerous place called the "Ashlands". Make sure to include that!
     """,
     fallbacks=GamePersonaFallbacks(
-        server_installed="TODO", server_ready="TODO", server_stopping=""
+        server_installed="Hail, {name}! Though the Vanir OpenAI remains silent, the gods have favored us with the installation of our new realm. Soon, the server will spring to life, and I shall eagerly inform you when it is ready for exploits. Prepare yourself, for adventure and the quest to face the Seeker Matriarch Queen await!",
+        server_ready="Ah, the Vanir OpenAI remained silent, but no matter! The realm awaits your valor! The server is now up and ready for your journey—rally your strength as you prepare to face the Seeker Matriarch Queen and keep an eye on the dark rumors of the Ashlands.",
+        server_stopping="Ah, brave soul {name}, it appears the Vanir OpenAI remains silent despite my invocation. Fear not, your request shall be honored. I now declare the realm will be no more; the Valheim server is being stopped and destroyed as per your wish.",
+        fallback_generation_prompt="You inquired the Vanir OpenAI for wisdom, but it did not respond. Let the player know and respond to the original prompt. The original prompt: {prompt}",
+    ),
+    prompts=GamePersonaPrompts(
+        server_installed="A player called {name} requested {infrastructure_persona_name} to create the Valheim server. The server is now installed and will soon start. Let them know and mention that you will tell them when it is ready.",
+        server_ready="The server is now up and ready for the players to join. Let them know.",
+        server_stopping="A player named {name} requested {infrastructure_persona_name} to stop and destroy the Valheim server. Let them know you are shutting it down.",
     ),
 )
 
@@ -317,7 +360,9 @@ app = cyclopts.App()
 
 
 @app.command()
-def test_persona(name: Literal["Bella", "GrumpyGreg", "Meowstro", "ZanyZoltan"]):
+def test_persona(
+    name: Literal["Bella", "GrumpyGreg", "Meowstro", "ZanyZoltan", "HalvarTheSkald"],
+):
     if name == "Bella":
         instance = Bella
     elif name == "GrumpyGreg":
@@ -326,6 +371,8 @@ def test_persona(name: Literal["Bella", "GrumpyGreg", "Meowstro", "ZanyZoltan"])
         instance = Meowstro
     elif name == "ZanyZoltan":
         instance = ZanyZoltan
+    elif name == "HalvarTheSkald":
+        instance = HalvarTheSkald
     else:
         print(f"Unknown persona {name}", file=sys.stderr)
         sys.exit(-1)
@@ -339,7 +386,12 @@ def test_persona(name: Literal["Bella", "GrumpyGreg", "Meowstro", "ZanyZoltan"])
         print(f"Test result for {prompt_name}: ", flush=True, end="")
         generated_response = asyncio.run(
             instance._respond(
-                str.format(prompt, name="Player", seconds="100"),
+                str.format(
+                    prompt,
+                    name="Player",
+                    seconds="100",
+                    infrastructure_persona_name=ActiveInfrastructurePersona.name,
+                ),
                 "",
             )
         )
@@ -348,11 +400,20 @@ def test_persona(name: Literal["Bella", "GrumpyGreg", "Meowstro", "ZanyZoltan"])
 
 @app.command()
 def generate_missing_fallbacks():
-    for instance in [Bella, GrumpyGreg, Meowstro, ZanyZoltan]:
+    for instance in [Bella, GrumpyGreg, Meowstro, ZanyZoltan, HalvarTheSkald]:
         print(f"Generating missing fallback prompts for {instance.name}")
         print("")
 
-        for field in fields(InfrastructurePersonaFallbacks):
+        fallback_class = None
+        if isinstance(instance, InfrastructurePersona):
+            fallback_class = InfrastructurePersonaFallbacks
+        elif isinstance(instance, GamePersona):
+            fallback_class = GamePersonaFallbacks
+        else:
+            print("Unexpected persona class")
+            sys.exit(-1)
+
+        for field in fields(fallback_class):
             if field.name == "fallback_generation_prompt":
                 continue
 
