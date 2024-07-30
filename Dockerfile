@@ -29,12 +29,12 @@ ENV PATH="$POETRY_HOME/bin:$VENV_PATH/bin:$PATH"
 
 FROM python:3.11.1-slim AS runtime-discord-bot
 
-WORKDIR /app/discord_bot
+WORKDIR /app
 
 COPY --from=build /runtime /usr/local
 COPY --from=build /app/ /app/
 
-CMD [ "python", "bot.py" ]
+CMD [ "python", "-m", "discord_bot.bot" ]
 
 FROM python:3.11.1-slim AS runtime-job-runner
 
@@ -63,7 +63,7 @@ RUN apt-get update && \
   apt-get install --no-install-recommends -y ca-certificates curl openssh-client rsync bzip2 jq && \
   rm -rf /var/lib/apt/lists
 
-WORKDIR /app/discord_bot
+WORKDIR /app
 
 COPY --from=build /runtime /usr/local
 COPY --from=build /app/ /app/
@@ -78,15 +78,15 @@ ENV TF_DATA_DIR_BASE=/terraform/init
 
 ENTRYPOINT [ "/app/terraform/terraform-entrypoint.sh" ]
 
-CMD [ "rq", "worker", "-c", "sentry", "--with-scheduler" ]
+CMD [ "rq", "worker", "-c", "discord_bot.sentry", "--with-scheduler" ]
 
 FROM python:3.11.1-slim AS runtime-server-launch-watcher
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
-WORKDIR /app/discord_bot
+WORKDIR /app
 
 COPY --from=build /runtime /usr/local
 COPY --from=build /app/ /app/
 
-CMD [ "python", "server_launch_watcher.py" ]
+CMD [ "python", "-m", "discord_bot.server_launch_watcher" ]

@@ -6,7 +6,7 @@ from dataclasses import dataclass
 
 import backoff
 import requests
-from gpt.personas import GrumpyGreg
+from .gpt.personas import ActiveInfrastructurePersona
 from loguru import logger
 
 import docker
@@ -88,8 +88,8 @@ def get_addresses() -> ServerAddresses:
 def notify_server_ready(server_addresses: ServerAddresses):
     data = {
         "content": f"{SERVER_READY_MESSAGE} [{server_addresses}]",
-        "avatar_url": GrumpyGreg.avatar_url,
-        "username": GrumpyGreg.name,
+        "avatar_url": ActiveInfrastructurePersona.avatar_url,
+        "username": ActiveInfrastructurePersona.name,
     }
     result = requests.post(DISCORD_WEBHOOK, json=data)
     result.raise_for_status()

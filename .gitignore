@@ -48,3 +48,4 @@ job-runner.env
 __pycache__/
 
 chart/charts
+.aider*

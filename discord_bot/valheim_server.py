@@ -2,7 +2,7 @@ import os
 import pathlib
 import subprocess
 
-from gpt import personas
+from .gpt import personas
 
 SCRIPTS_PATH = pathlib.Path(__file__).parent.parent.joinpath("scripts")
 
