@@ -10,8 +10,8 @@ DEFAULT_ENV = {
     **os.environ,
     "GAME_NAME": "valheim",
     "GAME_DISPLAY_NAME": "Valheim",
-    "BOT_NAME": personas.GrumpyGreg.name,
-    "BOT_AVATAR_URL": personas.GrumpyGreg.avatar_url,
+    "BOT_NAME": personas.ActiveInfrastructurePersona.name,
+    "BOT_AVATAR_URL": personas.ActiveInfrastructurePersona.avatar_url,
     "BOT_GAME_PERSONA_NAME": personas.HalvarTheSkald.name,
     "BOT_GAME_PERSONA_AVATAR_URL": personas.HalvarTheSkald.avatar_url,
 }
