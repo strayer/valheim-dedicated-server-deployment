@@ -13,17 +13,17 @@ async def respond(system_prompt: str, user_prompt: str):
     global OPENAI_CLIENT
 
     if AZURE_OPENAI_DEPLOYMENT == "" or AZURE_OPENAI_DEPLOYMENT is None:
-        print("TODO error")
-        sys.exit(-1)
+        print("Error: AZURE_OPENAI_DEPLOYMENT is not set. Please set this environment variable.")
+        sys.exit(1)
 
     if OPENAI_CLIENT is None:
         if AZURE_OPENAI_KEY == "" or AZURE_OPENAI_KEY is None:
-            print("TODO error")
-            sys.exit(-1)
+            print("Error: AZURE_OPENAI_KEY is not set. Please set this environment variable.")
+            sys.exit(1)
 
         if AZURE_OPENAI_ENDPOINT == "" or AZURE_OPENAI_ENDPOINT is None:
-            print("TODO error")
-            sys.exit(-1)
+            print("Error: AZURE_OPENAI_ENDPOINT is not set. Please set this environment variable.")
+            sys.exit(1)
 
         OPENAI_CLIENT = AsyncAzureOpenAI(
             api_key=AZURE_OPENAI_KEY,
