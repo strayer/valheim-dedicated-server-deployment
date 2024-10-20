@@ -10,7 +10,11 @@ from . import (
     db,
     jobs,
 )
-from .gpt.personas import ActiveInfrastructurePersona, HalvarTheSkald
+from .gpt.personas import (
+    ActiveInfrastructurePersona,
+    FitzgeraldGallagher,
+    HalvarTheSkald,
+)
 
 GUILD_ID = int(os.environ["GUILD_ID"])
 ALLOWED_CHANNEL_IDS = os.environ["CHANNEL_IDS"].split(",")
@@ -180,7 +184,14 @@ async def start_factorio(ctx: lightbulb.SlashContext) -> None:
     )
     await ctx.respond(response)
 
-    jobs.get_queue().enqueue(jobs.start_factorio_server)
+    server_started_response = await FitzgeraldGallagher.server_installed(
+        player_name=member_name(ctx),
+        infrastructure_persona_name=ActiveInfrastructurePersona.name,
+    )
+    server_ready_response = await FitzgeraldGallagher.server_ready()
+    jobs.get_queue().enqueue(
+        jobs.start_factorio_server, server_started_response, server_ready_response
+    )
 
 
 @bot.command
@@ -203,7 +214,14 @@ async def stop_factorio(ctx: lightbulb.SlashContext) -> None:
 
     await ctx.respond(response)
 
-    jobs.get_queue().enqueue(jobs.stop_factorio_server)
+    server_stopping_response = await FitzgeraldGallagher.server_stopping(
+        player_name=member_name(ctx),
+        infrastructure_persona_name=ActiveInfrastructurePersona.name,
+    )
+    stop_finished_response = await ActiveInfrastructurePersona.factorio_stop_finished()
+    jobs.get_queue().enqueue(
+        jobs.stop_factorio_server, server_stopping_response, stop_finished_response
+    )
 
 
 @bot.command

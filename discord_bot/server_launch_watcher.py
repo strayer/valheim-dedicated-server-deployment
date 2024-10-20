@@ -6,7 +6,10 @@ from dataclasses import dataclass
 
 import backoff
 import requests
-from .gpt.personas import ActiveInfrastructurePersona, HalvarTheSkald
+from .gpt.personas import (
+    FitzgeraldGallagher,
+    HalvarTheSkald,
+)
 from loguru import logger
 
 import docker
@@ -30,6 +33,10 @@ if GAME_NAME == "valheim":
     CONTAINER_NAME = "valheim-server"
     REGEX_PATTERN = "Game server connected"
     GamePersona = HalvarTheSkald
+elif GAME_NAME == "factorio":
+    CONTAINER_NAME = "factorio-server"
+    REGEX_PATTERN = r"updateTick\(0\) changing state from\(CreatingGame\) to\(InGame\)"
+    GamePersona = FitzgeraldGallagher
 elif GAME_NAME is None or GAME_NAME == "":
     logger.error("GAME_NAME environment variable required to function")
     sys.exit(-1)
