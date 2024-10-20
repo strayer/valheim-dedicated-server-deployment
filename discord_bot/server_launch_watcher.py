@@ -35,7 +35,7 @@ if GAME_NAME == "valheim":
     GamePersona = HalvarTheSkald
 elif GAME_NAME == "factorio":
     CONTAINER_NAME = "factorio-server"
-    REGEX_PATTERN = r"updateTick\(0\) changing state from\(CreatingGame\) to\(InGame\)"
+    REGEX_PATTERN = r"changing state from\(CreatingGame\) to\(InGame\)"
     GamePersona = FitzgeraldGallagher
 elif GAME_NAME is None or GAME_NAME == "":
     logger.error("GAME_NAME environment variable required to function")
