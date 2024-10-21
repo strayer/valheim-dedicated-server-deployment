@@ -183,7 +183,7 @@ resource "hcloud_server" "factorio-server" {
   name        = "factorio-server"
   image       = data.hcloud_image.debian-12.id
   server_type = "ccx23"
-  location    = "nbg1"
+  location    = "fsn1"
 
   ssh_keys     = data.hcloud_ssh_keys.all_keys.ssh_keys.*.name
   firewall_ids = [hcloud_firewall.factorio-firewall.id]
