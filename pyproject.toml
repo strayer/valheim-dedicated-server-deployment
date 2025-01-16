@@ -1,26 +1,28 @@
-[tool.poetry]
-name = "discord-bot"
+[project]
+name = "game-server-deploynment-discord-bot"
 version = "0.1.0"
 description = ""
-authors = ["Sven Grunewaldt <strayer@olle-orks.org>"]
+authors = [{ name = "Sven Grunewaldt", email = "strayer@olle-orks.org" }]
+dependencies = [
+    "loguru >=0.7.0,<0.8.0",
+    "hikari >=2.0.0.dev113,<3.0.0",
+    "hikari-lightbulb >=2.3.0,<3.0.0",
+    "rq >=1.10.1,<2.0.0",
+    "sentry-sdk[rq] >=2.8.0,<3.0.0",
+    "docker >=7.0.0,<8.0.0",
+    "backoff >=2.2.1,<3.0.0",
+    "requests >=2.32.0,<3.0.0",
+]
+requires-python = ">=3.11,<3.12"
 license = "MIT"
 
-[tool.poetry.dependencies]
-python = "^3.11,<3.12"
-loguru = "^0.7.0"
-hikari = "^2.0.0.dev113"
-hikari-lightbulb = "^2.3.0"
-rq = "^1.10.1"
-sentry-sdk = {extras = ["rq"], version = "^2.8.0"}
-docker = "^7.0.0"
-backoff = "^2.2.1"
-requests = "^2.32.0"
-
-[build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+[tool.uv]
 
 [tool.pyright]
 venvPath = "."
 venv = ".venv"
 typeCheckingMode = "standard"
+reportUnusedImport = false
+
+[tool.ruff.lint]
+extend-select = ["TCH"]

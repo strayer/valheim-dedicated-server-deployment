@@ -1,42 +1,49 @@
 FROM python:3.11.1 as build
 
+COPY --from=ghcr.io/astral-sh/uv:0.5.16 /uv /bin/uv
+
 ENV PYTHONFAULTHANDLER=1 \
   PYTHONUNBUFFERED=1 \
   PYTHONHASHSEED=random \
-  PIP_NO_CACHE_DIR=off \
   PIP_DISABLE_PIP_VERSION_CHECK=on \
   PIP_DEFAULT_TIMEOUT=100 \
-  POETRY_NO_INTERACTION=1 \
-  POETRY_VIRTUALENVS_CREATE=false \
-  PATH="$PATH:/runtime/bin" \
-  PYTHONPATH="$PYTHONPATH:/runtime/lib/python3.11/site-packages" \
-  # Versions:
-  POETRY_VERSION=1.2.2
+  # Use the virtual environment automatically
+  VIRTUAL_ENV=/opt/.venv \
+  # Place executables in the environment at the front of the path
+  PATH="/opt/.venv/bin:$PATH"
 
-RUN pip install "poetry==$POETRY_VERSION"
+WORKDIR /opt
+
+COPY pyproject.toml uv.lock ./
+
+RUN uv sync --frozen --no-install-project
 
 WORKDIR /app
-
-COPY pyproject.toml poetry.lock ./
-
-RUN poetry export --without-hashes --no-interaction --no-ansi -f requirements.txt -o requirements.txt && \
-  pip install --prefix=/runtime --force-reinstall -r requirements.txt
 
 COPY discord_bot/ ./discord_bot/
 
-# prepend poetry and venv to path
-ENV PATH="$POETRY_HOME/bin:$VENV_PATH/bin:$PATH"
-
 FROM python:3.11.1-slim AS runtime-discord-bot
+
+ENV \
+  # Use the virtual environment automatically
+  VIRTUAL_ENV=/opt/.venv \
+  # Place executables in the environment at the front of the path
+  PATH="/opt/.venv/bin:$PATH"
 
 WORKDIR /app
 
-COPY --from=build /runtime /usr/local
+COPY --from=build /opt/.venv/ /opt/.venv/
 COPY --from=build /app/ /app/
 
 CMD [ "python", "-m", "discord_bot.bot" ]
 
 FROM python:3.11.1-slim AS runtime-job-runner
+
+ENV \
+  # Use the virtual environment automatically
+  VIRTUAL_ENV=/opt/.venv \
+  # Place executables in the environment at the front of the path
+  PATH="/opt/.venv/bin:$PATH"
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
@@ -65,7 +72,7 @@ RUN apt-get update && \
 
 WORKDIR /app
 
-COPY --from=build /runtime /usr/local
+COPY --from=build /opt/.venv/ /opt/.venv/
 COPY --from=build /app/ /app/
 
 COPY scripts/ /app/scripts/
@@ -82,11 +89,17 @@ CMD [ "rq", "worker", "-c", "discord_bot.sentry", "--with-scheduler" ]
 
 FROM python:3.11.1-slim AS runtime-server-launch-watcher
 
+ENV \
+  # Use the virtual environment automatically
+  VIRTUAL_ENV=/opt/.venv \
+  # Place executables in the environment at the front of the path
+  PATH="/opt/.venv/bin:$PATH"
+
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 WORKDIR /app
 
-COPY --from=build /runtime /usr/local
+COPY --from=build /opt/.venv/ /opt/.venv/
 COPY --from=build /app/ /app/
 
 CMD [ "python", "-m", "discord_bot.server_launch_watcher" ]
