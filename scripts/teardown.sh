@@ -14,9 +14,7 @@ fi
 
 json_message=$(jq -n \
   --arg content "$BOT_MESSAGE_STARTED" \
-  --arg avatar_url "$BOT_GAME_PERSONA_AVATAR_URL" \
-  --arg username "$BOT_GAME_PERSONA_NAME" \
-  '{$content, $avatar_url, $username}')
+  '{$content}')
 
 curl -i \
   -H "Accept: application/json" \
@@ -44,16 +42,12 @@ echo "Destroying resources…"
 
 cd "$SCRIPT_DIR"/../terraform/"$GAME_NAME"
 terraform destroy -auto-approve -var="ssh_pubkey=foobar" \
-  -var="game_persona_bot_name=$BOT_GAME_PERSONA_NAME" \
-  -var="game_persona_bot_avatar_url=$BOT_GAME_PERSONA_AVATAR_URL" \
   -var="bot_server_started_message=foobar" \
   -var="bot_server_ready_message=foobar"
 
 json_message=$(jq -n \
   --arg content "$BOT_MESSAGE_FINISHED" \
-  --arg avatar_url "$BOT_AVATAR_URL" \
-  --arg username "$BOT_NAME" \
-  '{$content, $avatar_url, $username}')
+  '{$content}')
 
 curl -i \
   -H "Accept: application/json" \

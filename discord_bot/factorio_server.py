@@ -2,18 +2,12 @@ import subprocess
 import pathlib
 import os
 
-from discord_bot.gpt import personas
-
 SCRIPTS_PATH = pathlib.Path(__file__).parent.parent.joinpath("scripts")
 
 DEFAULT_ENV = {
     **os.environ,
     "GAME_NAME": "factorio",
     "GAME_DISPLAY_NAME": "Factorio",
-    "BOT_NAME": personas.ActiveInfrastructurePersona.name,
-    "BOT_AVATAR_URL": personas.ActiveInfrastructurePersona.avatar_url,
-    "BOT_GAME_PERSONA_NAME": personas.FitzgeraldGallagher.name,
-    "BOT_GAME_PERSONA_AVATAR_URL": personas.FitzgeraldGallagher.avatar_url,
 }
 
 

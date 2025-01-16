@@ -6,10 +6,6 @@ from dataclasses import dataclass
 
 import backoff
 import requests
-from .gpt.personas import (
-    FitzgeraldGallagher,
-    HalvarTheSkald,
-)
 from loguru import logger
 
 import docker
@@ -32,11 +28,9 @@ if SERVER_READY_MESSAGE is None or SERVER_READY_MESSAGE == "":
 if GAME_NAME == "valheim":
     CONTAINER_NAME = "valheim-server"
     REGEX_PATTERN = "Game server connected"
-    GamePersona = HalvarTheSkald
 elif GAME_NAME == "factorio":
     CONTAINER_NAME = "factorio-server"
     REGEX_PATTERN = r"changing state from\(CreatingGame\) to\(InGame\)"
-    GamePersona = FitzgeraldGallagher
 elif GAME_NAME is None or GAME_NAME == "":
     logger.error("GAME_NAME environment variable required to function")
     sys.exit(-1)
@@ -96,8 +90,6 @@ def get_addresses() -> ServerAddresses:
 def notify_server_ready(server_addresses: ServerAddresses):
     data = {
         "content": f"{SERVER_READY_MESSAGE} [{server_addresses}]",
-        "avatar_url": GamePersona.avatar_url,
-        "username": GamePersona.name,
     }
     result = requests.post(DISCORD_WEBHOOK, json=data)
     result.raise_for_status()

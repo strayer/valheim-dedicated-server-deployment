@@ -2,9 +2,9 @@ import os
 from rq import Queue
 from loguru import logger
 import redis
-from . import valheim_server
-from . import factorio_server
-from . import db
+from discord_bot import valheim_server
+from discord_bot import factorio_server
+from discord_bot import db
 
 _QUEUE = None
 

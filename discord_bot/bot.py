@@ -1,19 +1,12 @@
 from . import sentry  # noqa: F401
 import os
-from datetime import datetime
 
 import lightbulb
-import sentry_sdk
 from loguru import logger
 
-from . import (
+from discord_bot import (
     db,
     jobs,
-)
-from .gpt.personas import (
-    ActiveInfrastructurePersona,
-    FitzgeraldGallagher,
-    HalvarTheSkald,
 )
 
 GUILD_ID = int(os.environ["GUILD_ID"])
@@ -22,21 +15,6 @@ ALLOWED_CHANNEL_IDS = os.environ["CHANNEL_IDS"].split(",")
 COMMAND_PREFIX = "dev-" if os.getenv("ENV") == "dev" else ""
 
 bot = lightbulb.BotApp(token=os.environ["BOT_TOKEN"])
-
-
-@bot.listen(lightbulb.LightbulbStartedEvent)
-async def on_lightbulb_started_event(event: lightbulb.LightbulbStartedEvent):
-    logger.debug("Received LightbulbStartedEvent, updating bot username and avatar")
-
-    # this can fail due to rate limiting
-    try:
-        await event.app.rest.edit_my_user(
-            username=ActiveInfrastructurePersona.name,
-            avatar=ActiveInfrastructurePersona.avatar_url,
-        )
-    except Exception as e:
-        sentry_sdk.capture_exception(e)
-        pass
 
 
 def member_name(ctx: lightbulb.SlashContext):
@@ -87,8 +65,7 @@ async def cooldown(ctx: lightbulb.SlashContext, seconds: int) -> bool:
 
         await ctx.respond(
             str.format(
-                ActiveInfrastructurePersona.cooldown_message,
-                name=member_name(ctx),
+                f"ERROR: This command is on cooldown! Please retry later. ({ttl}s left)",
                 seconds=ttl,
             )
         )
@@ -119,15 +96,10 @@ async def start_valheim(ctx: lightbulb.SlashContext) -> None:
 
     log_command(ctx)
 
-    response = await ActiveInfrastructurePersona.valheim_start_request(member_name(ctx))
+    await ctx.respond("Valheim start trigger received, this may take a few minutes")
 
-    await ctx.respond(response)
-
-    server_started_response = await HalvarTheSkald.server_installed(
-        player_name=member_name(ctx),
-        infrastructure_persona_name=ActiveInfrastructurePersona.name,
-    )
-    server_ready_response = await HalvarTheSkald.server_ready()
+    server_started_response = "Valheim has been installed and save state backup restored, starting game server..."
+    server_ready_response = "Valheim server is ready!"
     jobs.get_queue().enqueue(
         jobs.start_valheim_server, server_started_response, server_ready_response
     )
@@ -149,15 +121,12 @@ async def stop_valheim(ctx: lightbulb.SlashContext) -> None:
 
     log_command(ctx)
 
-    response = await ActiveInfrastructurePersona.valheim_stop_request(member_name(ctx))
+    await ctx.respond("Server stop trigger received, this may take a few minutes")
 
-    await ctx.respond(response)
-
-    server_stopping_response = await HalvarTheSkald.server_stopping(
-        player_name=member_name(ctx),
-        infrastructure_persona_name=ActiveInfrastructurePersona.name,
+    server_stopping_response = "Valheim is shutting down..."
+    stop_finished_response = (
+        "Valheim server has been destroyed and world backed up 🧨💥"
     )
-    stop_finished_response = await ActiveInfrastructurePersona.valheim_stop_finished()
     jobs.get_queue().enqueue(
         jobs.stop_valheim_server, server_stopping_response, stop_finished_response
     )
@@ -179,16 +148,10 @@ async def start_factorio(ctx: lightbulb.SlashContext) -> None:
 
     log_command(ctx)
 
-    response = await ActiveInfrastructurePersona.factorio_start_request(
-        member_name(ctx)
-    )
-    await ctx.respond(response)
+    await ctx.respond("Factorio start trigger received, this may take a few minutes")
 
-    server_started_response = await FitzgeraldGallagher.server_installed(
-        player_name=member_name(ctx),
-        infrastructure_persona_name=ActiveInfrastructurePersona.name,
-    )
-    server_ready_response = await FitzgeraldGallagher.server_ready()
+    server_started_response = "Factorio has been installed and save state backup restored, starting game server..."
+    server_ready_response = "Factorio server is ready!"
     jobs.get_queue().enqueue(
         jobs.start_factorio_server, server_started_response, server_ready_response
     )
@@ -210,15 +173,12 @@ async def stop_factorio(ctx: lightbulb.SlashContext) -> None:
 
     log_command(ctx)
 
-    response = await ActiveInfrastructurePersona.factorio_stop_request(member_name(ctx))
+    await ctx.respond("Server stop trigger received, this may take a few minutes")
 
-    await ctx.respond(response)
-
-    server_stopping_response = await FitzgeraldGallagher.server_stopping(
-        player_name=member_name(ctx),
-        infrastructure_persona_name=ActiveInfrastructurePersona.name,
+    server_stopping_response = "Factorio is shutting down..."
+    stop_finished_response = (
+        "Factorio server has been destroyed and savegame backed up 🧨💥"
     )
-    stop_finished_response = await ActiveInfrastructurePersona.factorio_stop_finished()
     jobs.get_queue().enqueue(
         jobs.stop_factorio_server, server_stopping_response, stop_finished_response
     )
@@ -228,76 +188,17 @@ async def stop_factorio(ctx: lightbulb.SlashContext) -> None:
 @lightbulb.command(f"{COMMAND_PREFIX}ping", "pong?", guilds=[GUILD_ID], auto_defer=True)
 @lightbulb.implements(lightbulb.SlashCommand)
 async def ping(ctx: lightbulb.SlashContext) -> None:
-    log_command(ctx)
-
-    response = await ActiveInfrastructurePersona.ping(member_name(ctx))
-
-    await ctx.respond(f"{response} (channel_id: {ctx.channel_id})")
-
-
-@bot.command
-@lightbulb.command(
-    f"{COMMAND_PREFIX}thank-you-bella", "☺️", guilds=[GUILD_ID], auto_defer=True
-)
-@lightbulb.implements(lightbulb.SlashCommand)
-async def thankyoubella(ctx: lightbulb.SlashContext) -> None:
-    if not await cooldown(ctx, 10):
-        return
+    global TEST_MESSAGE_ID
 
     log_command(ctx)
 
-    response = await ActiveInfrastructurePersona.thank_you(member_name(ctx))
+    response = await ctx.respond(f"Pong! (channel_id: {ctx.channel_id})")
 
-    await ctx.respond(response)
-
-
-@bot.command
-@lightbulb.command(
-    f"{COMMAND_PREFIX}hey-bella", "☺️", guilds=[GUILD_ID], auto_defer=True
-)
-@lightbulb.implements(lightbulb.SlashCommand)
-async def heybella(ctx: lightbulb.SlashContext) -> None:
-    if not await cooldown(ctx, 10):
-        return
-
-    log_command(ctx)
-
-    response = await ActiveInfrastructurePersona.hey(member_name(ctx))
-
-    await ctx.respond(response)
-
-
-@bot.command
-@lightbulb.command(f"{COMMAND_PREFIX}tuesday", "🕹️", guilds=[GUILD_ID], auto_defer=True)
-@lightbulb.implements(lightbulb.SlashCommand)
-async def tuesday(ctx: lightbulb.SlashContext) -> None:
-    if not await cooldown(ctx, 10):
-        return
-
-    log_command(ctx)
-
-    if datetime.now().weekday() == 1:
-        response = await ActiveInfrastructurePersona.tuesday(member_name(ctx))
-    else:
-        response = await ActiveInfrastructurePersona.not_tuesday(member_name(ctx))
-
-    await ctx.respond(response)
-
-
-@bot.command
-@lightbulb.command(
-    f"{COMMAND_PREFIX}fuck-you-greg", "🕹️", guilds=[GUILD_ID], auto_defer=True
-)
-@lightbulb.implements(lightbulb.SlashCommand)
-async def fuck_you_greg(ctx: lightbulb.SlashContext) -> None:
-    if not await cooldown(ctx, 10):
-        return
-
-    log_command(ctx)
-
-    response = await ActiveInfrastructurePersona.fuck_you_greg(member_name(ctx))
-
-    await ctx.respond(response)
+    logger.info(
+        "Ponged {username}, response message ID {id}",
+        username=ctx.author.username,
+        id=(await response.message()).id,
+    )
 
 
 if __name__ == "__main__":

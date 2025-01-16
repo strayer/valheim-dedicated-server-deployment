@@ -100,9 +100,7 @@ write_files:
 
       json_message=$(jq -n \
         --arg content "$BOT_MESSAGE" \
-        --arg avatar_url "${ game_persona_bot_avatar_url }" \
-        --arg username "${ game_persona_bot_name }" \
-        '{$content, $avatar_url, $username}')
+        '{$content}')
 
       curl -i \
         -H "Accept: application/json" \

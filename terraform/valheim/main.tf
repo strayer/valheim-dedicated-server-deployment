@@ -96,14 +96,6 @@ variable "ssh_pubkey" {
   sensitive = true
 }
 
-variable "game_persona_bot_name" {
-  type = string
-}
-
-variable "game_persona_bot_avatar_url" {
-  type = string
-}
-
 variable "bot_server_started_message" {
   type = string
 }
@@ -208,8 +200,6 @@ resource "hcloud_server" "valheim-server" {
     valheim_server_world                 = var.valheim_server_world,
     valheim_server_password              = var.valheim_server_password,
     valheim_discord_channel_webhook      = var.valheim_discord_channel_webhook
-    game_persona_bot_name                = var.game_persona_bot_name,
-    game_persona_bot_avatar_url          = var.game_persona_bot_avatar_url,
     bot_server_started_message           = var.bot_server_started_message,
     bot_server_ready_message             = var.bot_server_ready_message,
   })
