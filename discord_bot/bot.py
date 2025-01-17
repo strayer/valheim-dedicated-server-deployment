@@ -51,10 +51,9 @@ def log_command(ctx: lightbulb.SlashContext) -> None:
 
 
 async def cooldown(ctx: lightbulb.SlashContext, seconds: int) -> bool:
-    redis = db.get_redis()
-    if redis.get("cooldown_" + ctx.command.name) is not None:
-        ttl = redis.ttl("cooldown_" + ctx.command.name)
+    is_on_cooldown, ttl = db.get_cooldown(ctx.command.name)
 
+    if is_on_cooldown:
         logger.warning(
             "Received {command} command on cooldown in channel {channel} by user {username}, cooldown left is {ttl}",
             username=ctx.author.username,
@@ -71,13 +70,8 @@ async def cooldown(ctx: lightbulb.SlashContext, seconds: int) -> bool:
         )
         return False
 
-    set_cooldown(ctx, seconds)
+    db.set_cooldown(ctx.command.name, seconds)
     return True
-
-
-def set_cooldown(ctx: lightbulb.SlashContext, seconds: int) -> None:
-    redis = db.get_redis()
-    redis.set("cooldown_" + ctx.command.name, value=1, ex=seconds)
 
 
 @bot.command
