@@ -1,4 +1,4 @@
-FROM debian:11 AS steamcmd
+FROM debian:bookworm AS steamcmd
 
 RUN apt-get update && apt-get full-upgrade -y && rm -rf /var/lib/apt/lists
 
@@ -15,9 +15,9 @@ RUN apt-get update && \
 # dig & bind9-dnsutils (dig) for Discord webhooks
 RUN apt-get update && \
   apt-get install --no-install-recommends -y \
-    lib32gcc-s1 curl ca-certificates \
-    jq bind9-dnsutils \
-    && \
+  lib32gcc-s1 curl ca-certificates \
+  jq bind9-dnsutils \
+  && \
   rm -rf /var/lib/apt/lists
 
 ENV STEAMCMD_PATH /opt/steamcmd
