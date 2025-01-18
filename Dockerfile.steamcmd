@@ -2,8 +2,8 @@ FROM debian:bookworm AS steamcmd
 
 RUN apt-get update && apt-get full-upgrade -y && rm -rf /var/lib/apt/lists
 
-ENV LC_ALL en_US.UTF-8
-ENV LANG en_US.UTF-8
+ENV LC_ALL=en_US.UTF-8
+ENV LANG=en_US.UTF-8
 
 RUN apt-get update && \
   apt-get install -y locales && \
@@ -20,8 +20,8 @@ RUN apt-get update && \
   && \
   rm -rf /var/lib/apt/lists
 
-ENV STEAMCMD_PATH /opt/steamcmd
-ENV GAMEDATA_PATH /gamedata
+ENV STEAMCMD_PATH=/opt/steamcmd
+ENV GAMEDATA_PATH=/gamedata
 
 RUN useradd -u 1000 -m steam && \
   mkdir -p /home/steam/Steam/logs/ && \
@@ -47,10 +47,10 @@ ENTRYPOINT [ "/opt/bin/entrypoint.sh" ]
 
 FROM steamcmd AS valheim
 
-ENV STEAMAPPID 896660
-ENV GAME_NAME valheim
-ENV GAME_DISPLAY_NAME Valheim
-ENV GAME_PATH /opt/valheim
+ENV STEAMAPPID=896660
+ENV GAME_NAME=valheim
+ENV GAME_DISPLAY_NAME=Valheim
+ENV GAME_PATH=/opt/valheim
 
 COPY docker/valheim/start.sh /opt/bin/start-valheim.sh
 
