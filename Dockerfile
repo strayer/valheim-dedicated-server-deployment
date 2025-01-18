@@ -1,4 +1,4 @@
-FROM python:3.11.1 as build
+FROM python:3.11.1 AS build
 
 COPY --from=ghcr.io/astral-sh/uv:0.5.20 /uv /bin/uv
 
