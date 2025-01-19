@@ -31,6 +31,9 @@ if GAME_NAME == "valheim":
 elif GAME_NAME == "factorio":
     CONTAINER_NAME = "factorio-server"
     REGEX_PATTERN = r"changing state from\(CreatingGame\) to\(InGame\)"
+elif GAME_NAME == "enshrouded":
+    CONTAINER_NAME = "enshrouded-server"
+    REGEX_PATTERN = r"'\[Session\] HostOnline' \(up\)!"
 elif GAME_NAME is None or GAME_NAME == "":
     logger.error("GAME_NAME environment variable required to function")
     sys.exit(-1)
